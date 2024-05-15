@@ -53,6 +53,7 @@ const ProductForm = ({ product, onSubmit }) => {
           name="name"
           value={formState.name}
           onChange={handleChange}
+          required
         />
       </FormControl>
       <FormControl>
@@ -62,6 +63,7 @@ const ProductForm = ({ product, onSubmit }) => {
           name="brand"
           value={formState.brand}
           onChange={handleChange}
+          required
         />
       </FormControl>
       <FormControl>
@@ -71,6 +73,7 @@ const ProductForm = ({ product, onSubmit }) => {
           name="category"
           value={formState.category}
           onChange={handleChange}
+          required
         />
       </FormControl>
       <FormControl>
@@ -80,6 +83,7 @@ const ProductForm = ({ product, onSubmit }) => {
           name="supplier"
           value={formState.supplier}
           onChange={handleChange}
+          required
         />
       </FormControl>
       <FormControl>
@@ -89,6 +93,7 @@ const ProductForm = ({ product, onSubmit }) => {
           name="price"
           value={formState.price}
           onChange={handleChange}
+          required
         />
       </FormControl>
       <FormControl>
@@ -98,6 +103,7 @@ const ProductForm = ({ product, onSubmit }) => {
           name="stock"
           value={formState.stock}
           onChange={handleChange}
+          required
         />
       </FormControl>
       <FormControl>

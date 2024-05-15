@@ -5,22 +5,19 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  description: {
+  brand: {
     type: String,
-  },
-  price: {
-    type: Number,
     required: true,
   },
   category: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Category',
+    type: String,
+    required: true,
   },
-  brand: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Brand',
+  supplier: {
+    type: String,
+    required: true,
   },
-  weight: {
+  price: {
     type: Number,
     required: true,
   },
@@ -28,17 +25,12 @@ const productSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  marketPrice: {
-    type: Number,
-  },
-  purchasePrice: {
-    type: Number,
-  },
-  barcode: {
+  description: {
     type: String,
-    unique: true,
   },
-  images: [String],
+  imageUrl: {
+    type: String,
+  }
 });
 
 module.exports = mongoose.model('Product', productSchema);
