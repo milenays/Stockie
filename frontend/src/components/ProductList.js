@@ -25,15 +25,18 @@ const ProductList = ({ products, fetchProducts }) => {
           {products.map((product) => (
             <Tr key={product._id}>
               <Td>{product.name}</Td>
-              <Td>{product.price}</Td>
-              <Td>{product.category?.name}</Td>
-              <Td>{product.brand?.name}</Td>
+              <Td>{product.salePrice}</Td>
+              <Td>{product.category}</Td>
+              <Td>{product.brand}</Td>
               <Td>
                 <Flex>
                   <IconButton
                     aria-label="Edit"
                     icon={<EditIcon />}
                     mr={2}
+                    onClick={() => {
+                      // Edit işlemi için gerekli kodlar
+                    }}
                   />
                   <IconButton
                     aria-label="Delete"
