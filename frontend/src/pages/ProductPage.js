@@ -1,38 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from '@chakra-ui/react';
+import React, { useEffect, useState } from 'react';
+import { Box, Button, Flex, Heading, useDisclosure } from '@chakra-ui/react';
+import { AddIcon } from '@chakra-ui/icons';
 import ProductList from '../components/ProductList';
 import ProductForm from '../components/ProductForm';
 import { getProducts } from '../api/productApi';
 
 const ProductPage = () => {
   const [products, setProducts] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const fetchProducts = async () => {
+    const data = await getProducts();
+    setProducts(data);
+  };
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  const fetchProducts = async () => {
-    const productsData = await getProducts();
-    setProducts(productsData);
-  };
-
-  const handleAddProduct = () => {
-    setSelectedProduct(null);
-  };
-
-  const handleSave = () => {
-    fetchProducts();
-  };
-
   return (
-    <div>
-      <Button onClick={handleAddProduct}>Ürün Ekle</Button>
-      {selectedProduct && (
-        <ProductForm product={selectedProduct} onSave={handleSave} />
-      )}
-      <ProductList products={products} />
-    </div>
+    <Box p={5}>
+      <Flex justify="space-between" mb={5}>
+        <Heading size="lg">Products</Heading>
+        <Button leftIcon={<AddIcon />} colorScheme="teal" onClick={onOpen}>
+          Add Product
+        </Button>
+      </Flex>
+      <ProductList products={products} fetchProducts={fetchProducts} />
+      <ProductForm isOpen={isOpen} onClose={onClose} fetchProducts={fetchProducts} />
+    </Box>
   );
 };
 
