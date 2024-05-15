@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getProducts } from '../api/productApi';
-import ProductForm from './ProductForm';
-import { Button, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, useDisclosure } from '@chakra-ui/react';
+import ProductForm from '../components/ProductForm'; // components dizininden doğru içe aktarma
+import { Button, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, useDisclosure } from '@chakra-ui/react';
 
 const ProductPage = () => {
   const [products, setProducts] = useState([]);
