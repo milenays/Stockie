@@ -28,7 +28,7 @@ app.use('/api/variants', variantRoutes);
 
 // Database Connection
 const dbURI = process.env.MONGO_URI || 'mongodb://localhost/stockie';
-mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
+mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
