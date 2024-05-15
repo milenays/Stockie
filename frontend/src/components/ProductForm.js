@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { addProduct, editProduct } from '../api/productApi';
+import { addProduct, updateProduct } from '../api/productApi';
 import { Button, Input, FormControl, FormLabel } from '@chakra-ui/react';
 
 const ProductForm = ({ product, onSubmit }) => {
@@ -33,7 +33,7 @@ const ProductForm = ({ product, onSubmit }) => {
     e.preventDefault();
     try {
       if (product) {
-        await editProduct(product._id, formState);
+        await updateProduct(product._id, formState);
       } else {
         await addProduct(formState);
       }
