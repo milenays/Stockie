@@ -2,46 +2,51 @@ const express = require('express');
 const router = express.Router();
 const Supplier = require('../models/supplierModel');
 
-router.get('/suppliers', async (req, res) => {
+// Tedarikçi Ekleme
+router.post('/add', async (req, res) => {
+  const { name, contactInfo } = req.body;
+
   try {
-    const suppliers = await Supplier.find();
+    const newSupplier = new Supplier({ name, contactInfo });
+    const savedSupplier = await newSupplier.save();
+    res.status(201).json(savedSupplier);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Tedarikçi Listeleme
+router.get('/list', async (req, res) => {
+  try {
+    const suppliers = await Supplier.find({});
     res.json(suppliers);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 });
 
-router.post('/suppliers', async (req, res) => {
-  const supplier = new Supplier(req.body);
+// Tedarikçi Düzenleme
+router.put('/edit/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, contactInfo } = req.body;
+
   try {
-    const newSupplier = await supplier.save();
-    res.status(201).json(newSupplier);
+    const updatedSupplier = await Supplier.findByIdAndUpdate(id, { name, contactInfo }, { new: true });
+    res.json(updatedSupplier);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
 
-router.put('/suppliers/:id', async (req, res) => {
+// Tedarikçi Silme
+router.delete('/delete/:id', async (req, res) => {
+  const { id } = req.params;
+
   try {
-    const supplier = await Supplier.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!supplier) {
-      return res.status(404).json({ message: 'Supplier not found' });
-    }
-    res.json(supplier);
+    await Supplier.findByIdAndDelete(id);
+    res.json({ message: 'Supplier deleted successfully' });
   } catch (error) {
     res.status(400).json({ message: error.message });
-  }
-});
-
-router.delete('/suppliers/:id', async (req, res) => {
-  try {
-    const supplier = await Supplier.findByIdAndDelete(req.params.id);
-    if (!supplier) {
-      return res.status(404).json({ message: 'Supplier not found' });
-    }
-    res.json({ message: 'Supplier deleted' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
   }
 });
 

@@ -2,59 +2,51 @@ const express = require('express');
 const router = express.Router();
 const Category = require('../models/categoryModel');
 
-// Get all categories
-router.get('/', async (req, res) => {
+// Kategori Ekleme
+router.post('/add', async (req, res) => {
+  const { name } = req.body;
+
   try {
-    const categories = await Category.find();
+    const newCategory = new Category({ name });
+    const savedCategory = await newCategory.save();
+    res.status(201).json(savedCategory);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Kategori Listeleme
+router.get('/list', async (req, res) => {
+  try {
+    const categories = await Category.find({});
     res.json(categories);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 });
 
-// Add a new category
-router.post('/', async (req, res) => {
-  const category = new Category({
-    name: req.body.name,
-  });
-  
+// Kategori Düzenleme
+router.put('/edit/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
+
   try {
-    const newCategory = await category.save();
-    res.status(201).json(newCategory);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// Update a category
-router.put('/:id', async (req, res) => {
-  try {
-    const category = await Category.findById(req.params.id);
-    if (!category) {
-      return res.status(404).json({ message: 'Category not found' });
-    }
-
-    category.name = req.body.name;
-
-    const updatedCategory = await category.save();
+    const updatedCategory = await Category.findByIdAndUpdate(id, { name }, { new: true });
     res.json(updatedCategory);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 });
 
-// Delete a category
-router.delete('/:id', async (req, res) => {
-  try {
-    const category = await Category.findById(req.params.id);
-    if (!category) {
-      return res.status(404).json({ message: 'Category not found' });
-    }
+// Kategori Silme
+router.delete('/delete/:id', async (req, res) => {
+  const { id } = req.params;
 
-    await category.remove();
-    res.json({ message: 'Category deleted' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  try {
+    await Category.findByIdAndDelete(id);
+    res.json({ message: 'Category deleted successfully' });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 });
 

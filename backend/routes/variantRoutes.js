@@ -2,59 +2,51 @@ const express = require('express');
 const router = express.Router();
 const Variant = require('../models/variantModel');
 
-// Get all variants
-router.get('/', async (req, res) => {
+// Varyant Ekleme
+router.post('/add', async (req, res) => {
+  const { name, options } = req.body;
+
   try {
-    const variants = await Variant.find();
+    const newVariant = new Variant({ name, options });
+    const savedVariant = await newVariant.save();
+    res.status(201).json(savedVariant);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Varyant Listeleme
+router.get('/list', async (req, res) => {
+  try {
+    const variants = await Variant.find({});
     res.json(variants);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 });
 
-// Add a new variant
-router.post('/', async (req, res) => {
-  const variant = new Variant({
-    name: req.body.name,
-  });
+// Varyant Düzenleme
+router.put('/edit/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, options } = req.body;
 
   try {
-    const newVariant = await variant.save();
-    res.status(201).json(newVariant);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// Update a variant
-router.put('/:id', async (req, res) => {
-  try {
-    const variant = await Variant.findById(req.params.id);
-    if (!variant) {
-      return res.status(404).json({ message: 'Variant not found' });
-    }
-
-    variant.name = req.body.name;
-
-    const updatedVariant = await variant.save();
+    const updatedVariant = await Variant.findByIdAndUpdate(id, { name, options }, { new: true });
     res.json(updatedVariant);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 });
 
-// Delete a variant
-router.delete('/:id', async (req, res) => {
-  try {
-    const variant = await Variant.findById(req.params.id);
-    if (!variant) {
-      return res.status(404).json({ message: 'Variant not found' });
-    }
+// Varyant Silme
+router.delete('/delete/:id', async (req, res) => {
+  const { id } = req.params;
 
-    await variant.remove();
-    res.json({ message: 'Variant deleted' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  try {
+    await Variant.findByIdAndDelete(id);
+    res.json({ message: 'Variant deleted successfully' });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 });
 
