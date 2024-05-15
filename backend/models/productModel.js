@@ -1,9 +1,24 @@
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
+  uniqueId: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   name: {
     type: String,
     required: true,
+    maxlength: 100,
+  },
+  stockCode: {
+    type: String,
+    required: true,
+  },
+  barcode: {
+    type: String,
+    required: true,
+    unique: true,
   },
   brand: {
     type: String,
@@ -13,24 +28,35 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  supplier: {
-    type: String,
-    required: true,
+  weight: {
+    type: Number,
   },
-  price: {
+  description: {
+    type: String,
+  },
+  images: {
+    type: [String],
+  },
+  marketPrice: {
+    type: Number,
+  },
+  salePrice: {
     type: Number,
     required: true,
+  },
+  purchasePrice: {
+    type: Number,
   },
   stock: {
     type: Number,
     required: true,
   },
-  description: {
-    type: String,
+  fakeStock: {
+    type: Number,
   },
-  imageUrl: {
-    type: String,
-  }
-});
+  criticalStock: {
+    type: Number,
+  },
+}, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);

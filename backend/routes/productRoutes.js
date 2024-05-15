@@ -1,14 +1,29 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/productModel');
+const { v4: uuidv4 } = require('uuid');
 
 // Ürün Ekleme
 router.post('/add', async (req, res) => {
-  const { name, brand, category, supplier, price, stock, description, imageUrl } = req.body;
+  const { name, stockCode, barcode, brand, category, weight, description, images, marketPrice, salePrice, purchasePrice, stock, fakeStock, criticalStock } = req.body;
 
   try {
     const newProduct = new Product({
-      name, brand, category, supplier, price, stock, description, imageUrl
+      uniqueId: uuidv4(),
+      name,
+      stockCode,
+      barcode,
+      brand,
+      category,
+      weight,
+      description,
+      images,
+      marketPrice,
+      salePrice,
+      purchasePrice,
+      stock,
+      fakeStock,
+      criticalStock
     });
 
     const savedProduct = await newProduct.save();
@@ -31,11 +46,24 @@ router.get('/list', async (req, res) => {
 // Ürün Düzenleme
 router.put('/edit/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, brand, category, supplier, price, stock, description, imageUrl } = req.body;
+  const { name, stockCode, barcode, brand, category, weight, description, images, marketPrice, salePrice, purchasePrice, stock, fakeStock, criticalStock } = req.body;
 
   try {
     const updatedProduct = await Product.findByIdAndUpdate(id, {
-      name, brand, category, supplier, price, stock, description, imageUrl
+      name,
+      stockCode,
+      barcode,
+      brand,
+      category,
+      weight,
+      description,
+      images,
+      marketPrice,
+      salePrice,
+      purchasePrice,
+      stock,
+      fakeStock,
+      criticalStock
     }, { new: true });
 
     res.json(updatedProduct);

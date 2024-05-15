@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getProducts } from '../api/productApi';
-import ProductForm from '../components/ProductForm'; // components dizininden doğru içe aktarma
+import { getProducts, deleteProduct } from '../api/productApi';
+import ProductForm from '../components/ProductForm';
 import { Button, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, useDisclosure } from '@chakra-ui/react';
 
 const ProductPage = () => {
@@ -31,6 +31,15 @@ const ProductPage = () => {
     onOpen();
   };
 
+  const handleDeleteClick = async (id) => {
+    try {
+      await deleteProduct(id);
+      fetchProducts();
+    } catch (error) {
+      console.error('Error deleting product:', error);
+    }
+  };
+
   const handleFormSubmit = () => {
     fetchProducts();
     onClose();
@@ -54,12 +63,12 @@ const ProductPage = () => {
           {products.map((product) => (
             <tr key={product._id}>
               <td>{product.name}</td>
-              <td>{product.price}</td>
+              <td>{product.salePrice}</td>
               <td>{product.category}</td>
               <td>{product.brand}</td>
               <td>
                 <Button onClick={() => handleEditClick(product)}>Edit</Button>
-                <Button>Delete</Button>
+                <Button onClick={() => handleDeleteClick(product._id)}>Delete</Button>
               </td>
             </tr>
           ))}
