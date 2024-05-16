@@ -1,46 +1,36 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const productRoutes = require('./routes/productRoutes');
-const categoryRoutes = require('./routes/categoryRoutes');
 const brandRoutes = require('./routes/brandRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
 const customerRoutes = require('./routes/customerRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
 const tagRoutes = require('./routes/tagRoutes');
 const taxRoutes = require('./routes/taxRoutes');
 const variantRoutes = require('./routes/variantRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(bodyParser.json());
 app.use(cors());
+app.use(express.json());
 
-// Veritabanı bağlantısı
-mongoose.connect('mongodb://localhost:27017/stockie', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useFindAndModify: false,
-  useCreateIndex: true,
-}).then(() => {
-  console.log('MongoDB connected...');
-}).catch(err => {
-  console.log(err);
-});
-
-// Rotalar
 app.use('/api/products', productRoutes);
-app.use('/api/categories', categoryRoutes);
 app.use('/api/brands', brandRoutes);
+app.use('/api/categories', categoryRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/tags', tagRoutes);
 app.use('/api/taxes', taxRoutes);
 app.use('/api/variants', variantRoutes);
+app.use('/api/orders', orderRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+mongoose
+  .connect('mongodb://localhost/stockie', { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => console.log(err));
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -1,24 +1,92 @@
-// src/components/Sidebar.js
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Box, VStack, Text } from '@chakra-ui/react';
-import { FiHome, FiPackage, FiList, FiUsers, FiBox, FiTag, FiPercent, FiSliders } from 'react-icons/fi';
+import { Link, useLocation } from 'react-router-dom';
+import { Box, Flex, Text, Stack, Collapse, useDisclosure, Icon } from '@chakra-ui/react';
+import { MdDashboard, MdShoppingCart, MdCategory, MdBrandingWatermark, MdLocalOffer, MdPeople, MdLocalShipping, MdTag, MdAttachMoney, MdExpandMore, MdExpandLess, MdViewList } from 'react-icons/md';
 
 const Sidebar = () => {
+  const { isOpen, onToggle } = useDisclosure();
+  const location = useLocation();
+
+  const isActive = (path) => location.pathname === path;
+
   return (
-    <Box width="250px" bg="teal.500" color="white" padding="4">
-      <Text fontSize="xl" fontWeight="bold" mb="4">Stockie</Text>
-      <VStack spacing="4" align="stretch">
-        <Link to="/dashboard"><FiHome /> Dashboard</Link>
-        <Link to="/products"><FiPackage /> Products</Link>
-        <Link to="/categories"><FiList /> Categories</Link>
-        <Link to="/brands"><FiBox /> Brands</Link>
-        <Link to="/customers"><FiUsers /> Customers</Link>
-        <Link to="/suppliers"><FiBox /> Suppliers</Link>
-        <Link to="/tags"><FiTag /> Tags</Link>
-        <Link to="/taxes"><FiPercent /> Taxes</Link>
-        <Link to="/variants"><FiSliders /> Variants</Link>
-      </VStack>
+    <Box bg="teal.500" color="white" minH="100vh" p={4}>
+      <Flex mb={8}>
+        <Text fontSize="2xl" fontWeight="bold">Stockie</Text>
+      </Flex>
+      <Stack spacing={4}>
+        <Link to="/">
+          <Flex align="center" p={2} bg={isActive('/') ? 'teal.700' : 'teal.500'} borderRadius="md">
+            <Icon as={MdDashboard} mr={2} />
+            <Text>Dashboard</Text>
+          </Flex>
+        </Link>
+        <Link to="/orders">
+          <Flex align="center" p={2} bg={isActive('/orders') ? 'teal.700' : 'teal.500'} borderRadius="md">
+            <Icon as={MdShoppingCart} mr={2} />
+            <Text>Orders</Text>
+          </Flex>
+        </Link>
+        <Box>
+          <Flex align="center" p={2} bg="teal.500" borderRadius="md" onClick={onToggle} cursor="pointer">
+            <Icon as={MdCategory} mr={2} />
+            <Text>Products</Text>
+            <Icon as={isOpen ? MdExpandLess : MdExpandMore} ml="auto" />
+          </Flex>
+          <Collapse in={isOpen}>
+            <Stack pl={4} mt={2} spacing={2}>
+              <Link to="/products">
+                <Flex align="center" p={2} bg={isActive('/products') ? 'teal.700' : 'teal.500'} borderRadius="md">
+                  <Icon as={MdViewList} mr={2} />
+                  <Text>Product List</Text>
+                </Flex>
+              </Link>
+              <Link to="/categories">
+                <Flex align="center" p={2} bg={isActive('/categories') ? 'teal.700' : 'teal.500'} borderRadius="md">
+                  <Icon as={MdCategory} mr={2} />
+                  <Text>Categories</Text>
+                </Flex>
+              </Link>
+              <Link to="/variants">
+                <Flex align="center" p={2} bg={isActive('/variants') ? 'teal.700' : 'teal.500'} borderRadius="md">
+                  <Icon as={MdLocalOffer} mr={2} />
+                  <Text>Variants</Text>
+                </Flex>
+              </Link>
+              <Link to="/brands">
+                <Flex align="center" p={2} bg={isActive('/brands') ? 'teal.700' : 'teal.500'} borderRadius="md">
+                  <Icon as={MdBrandingWatermark} mr={2} />
+                  <Text>Brands</Text>
+                </Flex>
+              </Link>
+              <Link to="/taxes">
+                <Flex align="center" p={2} bg={isActive('/taxes') ? 'teal.700' : 'teal.500'} borderRadius="md">
+                  <Icon as={MdAttachMoney} mr={2} />
+                  <Text>Taxes</Text>
+                </Flex>
+              </Link>
+              <Link to="/tags">
+                <Flex align="center" p={2} bg={isActive('/tags') ? 'teal.700' : 'teal.500'} borderRadius="md">
+                  <Icon as={MdTag} mr={2} />
+                  <Text>Tags</Text>
+                </Flex>
+              </Link>
+              <Link to="/customers">
+                <Flex align="center" p={2} bg={isActive('/customers') ? 'teal.700' : 'teal.500'} borderRadius="md">
+                  <Icon as={MdPeople} mr={2} />
+                  <Text>Customers</Text>
+                </Flex>
+              </Link>
+              <Link to="/suppliers">
+                <Flex align="center" p={2} bg={isActive('/suppliers') ? 'teal.700' : 'teal.500'} borderRadius="md">
+                  <Icon as={MdLocalShipping} mr={2} />
+                  <Text>Suppliers</Text>
+                </Flex>
+              </Link>
+            </Stack>
+          </Collapse>
+        </Box>
+      </Stack>
     </Box>
   );
 };
