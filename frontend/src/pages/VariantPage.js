@@ -1,26 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Button, useDisclosure } from '@chakra-ui/react';
-import VariantList from '../components/VariantList';
+import { getVariants, addVariant, updateVariant, deleteVariant } from '../api/variantApi';
 import VariantForm from '../components/VariantForm';
-import { getVariants, deleteVariant } from '../api/variantApi';
+import { Button, Table, Tbody, Td, Th, Thead, Tr, useDisclosure } from '@chakra-ui/react';
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton } from "@chakra-ui/react";
 
-const VariantPage = () => {
+const VariantsPage = () => {
   const [variants, setVariants] = useState([]);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
-    const fetchVariants = async () => {
-      try {
-        const data = await getVariants();
-        setVariants(data);
-      } catch (error) {
-        console.error('Error fetching variants:', error);
-      }
-    };
-
     fetchVariants();
   }, []);
+
+  const fetchVariants = async () => {
+    const data = await getVariants();
+    setVariants(data);
+  };
 
   const handleAdd = () => {
     setSelectedVariant(null);
@@ -33,23 +29,56 @@ const VariantPage = () => {
   };
 
   const handleDelete = async (id) => {
-    try {
-      await deleteVariant(id);
-      setVariants((prevVariants) => prevVariants.filter((variant) => variant._id !== id));
-    } catch (error) {
-      console.error('Error deleting variant:', error);
+    await deleteVariant(id);
+    fetchVariants();
+  };
+
+  const handleSubmit = async (values) => {
+    if (selectedVariant) {
+      await updateVariant(selectedVariant._id, values);
+    } else {
+      await addVariant(values);
     }
+    fetchVariants();
+    onClose();
   };
 
   return (
     <div>
-      <Button onClick={handleAdd} colorScheme="blue" mb={4}>
-        Add Variant
-      </Button>
-      <VariantList variants={variants} onEdit={handleEdit} onDelete={handleDelete} />
-      <VariantForm isOpen={isOpen} onClose={onClose} variant={selectedVariant} setVariants={setVariants} />
+      <Button onClick={handleAdd} colorScheme="teal" mb={4}>Add Variant</Button>
+      <Table variant="simple">
+        <Thead>
+          <Tr>
+            <Th>Name</Th>
+            <Th>Options</Th>
+            <Th>Actions</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {variants.map((variant) => (
+            <Tr key={variant._id}>
+              <Td>{variant.name}</Td>
+              <Td>{variant.options.join(', ')}</Td>
+              <Td>
+                <Button colorScheme="teal" onClick={() => handleEdit(variant)}>Edit</Button>
+                <Button colorScheme="red" onClick={() => handleDelete(variant._id)}>Delete</Button>
+              </Td>
+            </Tr>
+          ))}
+        </Tbody>
+      </Table>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>{selectedVariant ? 'Edit Variant' : 'Add Variant'}</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VariantForm variant={selectedVariant} onSubmit={handleSubmit} />
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </div>
   );
 };
 
-export default VariantPage;
+export default VariantsPage;

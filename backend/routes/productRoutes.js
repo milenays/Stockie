@@ -1,15 +1,37 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/productModel');
-const { v4: uuidv4 } = require('uuid');
 
-// Ürün Ekleme
+// Add Product
 router.post('/add', async (req, res) => {
-  const { name, stockCode, barcode, brand, category, weight, description, images, marketPrice, salePrice, purchasePrice, stock, fakeStock, criticalStock } = req.body;
+  const {
+    name,
+    stockCode,
+    barcode,
+    brand,
+    category,
+    weight,
+    description,
+    images,
+    marketPrice,
+    salePrice,
+    purchasePrice,
+    stock,
+    fakeStock,
+    criticalStock,
+    uniqueId
+  } = req.body;
+
+  // Gelen verileri kontrol etmek için loglama
+  console.log(req.body);
+
+  // Check for required fields
+  if (!name || !stockCode || !barcode || !brand || !category || !salePrice || !stock || !uniqueId) {
+    return res.status(400).json({ message: 'Please fill all required fields' });
+  }
 
   try {
     const newProduct = new Product({
-      uniqueId: uuidv4(),
       name,
       stockCode,
       barcode,
@@ -23,64 +45,48 @@ router.post('/add', async (req, res) => {
       purchasePrice,
       stock,
       fakeStock,
-      criticalStock
+      criticalStock,
+      uniqueId
     });
 
     const savedProduct = await newProduct.save();
     res.status(201).json(savedProduct);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error(error); // Hata mesajını loglama
+    res.status(400).json({ message: 'Error adding product', error });
   }
 });
 
-// Ürün Listeleme
-router.get('/list', async (req, res) => {
+// Diğer endpointler
+router.get('/', async (req, res) => {
   try {
-    const products = await Product.find({});
-    res.json(products);
+    const products = await Product.find();
+    res.status(200).json(products);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: 'Error fetching products', error });
   }
 });
 
-// Ürün Düzenleme
-router.put('/edit/:id', async (req, res) => {
+router.put('/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, stockCode, barcode, brand, category, weight, description, images, marketPrice, salePrice, purchasePrice, stock, fakeStock, criticalStock } = req.body;
+  const updatedProduct = req.body;
 
   try {
-    const updatedProduct = await Product.findByIdAndUpdate(id, {
-      name,
-      stockCode,
-      barcode,
-      brand,
-      category,
-      weight,
-      description,
-      images,
-      marketPrice,
-      salePrice,
-      purchasePrice,
-      stock,
-      fakeStock,
-      criticalStock
-    }, { new: true });
-
-    res.json(updatedProduct);
+    const product = await Product.findByIdAndUpdate(id, updatedProduct, { new: true });
+    res.status(200).json(product);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: 'Error updating product', error });
   }
 });
 
-// Ürün Silme
-router.delete('/delete/:id', async (req, res) => {
+router.delete('/:id', async (req, res) => {
   const { id } = req.params;
 
   try {
     await Product.findByIdAndDelete(id);
-    res.json({ message: 'Product deleted successfully' });
+    res.status(200).json({ message: 'Product deleted successfully' });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: 'Error deleting product', error });
   }
 });
 

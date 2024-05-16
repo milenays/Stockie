@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 const Supplier = require('../models/supplierModel');
 
-// Tedarikçi Ekleme
 router.post('/add', async (req, res) => {
-  const { name, contactInfo } = req.body;
-
+  const { name, email, phone, address } = req.body;
   try {
-    const newSupplier = new Supplier({ name, contactInfo });
+    if (!name || !email || !phone || !address) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+    const newSupplier = new Supplier({ name, email, phone, address });
     const savedSupplier = await newSupplier.save();
     res.status(201).json(savedSupplier);
   } catch (error) {
@@ -15,7 +16,6 @@ router.post('/add', async (req, res) => {
   }
 });
 
-// Tedarikçi Listeleme
 router.get('/list', async (req, res) => {
   try {
     const suppliers = await Supplier.find({});
@@ -25,23 +25,19 @@ router.get('/list', async (req, res) => {
   }
 });
 
-// Tedarikçi Düzenleme
 router.put('/edit/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, contactInfo } = req.body;
-
+  const { name, email, phone, address } = req.body;
   try {
-    const updatedSupplier = await Supplier.findByIdAndUpdate(id, { name, contactInfo }, { new: true });
+    const updatedSupplier = await Supplier.findByIdAndUpdate(id, { name, email, phone, address }, { new: true });
     res.json(updatedSupplier);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
 
-// Tedarikçi Silme
 router.delete('/delete/:id', async (req, res) => {
   const { id } = req.params;
-
   try {
     await Supplier.findByIdAndDelete(id);
     res.json({ message: 'Supplier deleted successfully' });

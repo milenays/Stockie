@@ -2,11 +2,12 @@ const express = require('express');
 const router = express.Router();
 const Tax = require('../models/taxModel');
 
-// Vergi Ekleme
 router.post('/add', async (req, res) => {
   const { name, rate } = req.body;
-
   try {
+    if (!name || !rate) {
+      return res.status(400).json({ message: 'Name and rate are required' });
+    }
     const newTax = new Tax({ name, rate });
     const savedTax = await newTax.save();
     res.status(201).json(savedTax);
@@ -15,7 +16,6 @@ router.post('/add', async (req, res) => {
   }
 });
 
-// Vergi Listeleme
 router.get('/list', async (req, res) => {
   try {
     const taxes = await Tax.find({});
@@ -25,11 +25,9 @@ router.get('/list', async (req, res) => {
   }
 });
 
-// Vergi Düzenleme
 router.put('/edit/:id', async (req, res) => {
   const { id } = req.params;
   const { name, rate } = req.body;
-
   try {
     const updatedTax = await Tax.findByIdAndUpdate(id, { name, rate }, { new: true });
     res.json(updatedTax);
@@ -38,10 +36,8 @@ router.put('/edit/:id', async (req, res) => {
   }
 });
 
-// Vergi Silme
 router.delete('/delete/:id', async (req, res) => {
   const { id } = req.params;
-
   try {
     await Tax.findByIdAndDelete(id);
     res.json({ message: 'Tax deleted successfully' });

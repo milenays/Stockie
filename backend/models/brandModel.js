@@ -5,6 +5,10 @@ const brandSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  description: {
+    type: String,
+    required: false,  // Eğer description alanının zorunlu olmasını istemiyorsanız
+  }
 });
 
 module.exports = mongoose.model('Brand', brandSchema);

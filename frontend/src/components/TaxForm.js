@@ -1,101 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  Button,
-  Input,
-  FormControl,
-  FormLabel,
-  NumberInput,
-  NumberInputField,
-} from '@chakra-ui/react';
-import { addTax, updateTax } from '../api/taxApi';
+import React from 'react';
+import { useFormik } from 'formik';
+import { Button, Input, FormControl, FormLabel } from '@chakra-ui/react';
 
-const TaxForm = ({ isOpen, onClose, tax, setTaxes }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    rate: '',
+const TaxForm = ({ tax, onSubmit }) => {
+  const formik = useFormik({
+    initialValues: {
+      name: tax ? tax.name : '',
+      rate: tax ? tax.rate : '',
+    },
+    enableReinitialize: true,
+    onSubmit: (values) => {
+      onSubmit(values);
+    },
   });
 
-  useEffect(() => {
-    if (tax) {
-      setFormData(tax);
-    }
-  }, [tax]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
-  const handleRateChange = (value) => {
-    setFormData({
-      ...formData,
-      rate: value,
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (tax) {
-        const updatedTax = await updateTax(tax._id, formData);
-        setTaxes((prevTaxes) =>
-          prevTaxes.map((t) => (t._id === updatedTax._id ? updatedTax : t))
-        );
-      } else {
-        const newTax = await addTax(formData);
-        setTaxes((prevTaxes) => [...prevTaxes, newTax]);
-      }
-      onClose();
-    } catch (error) {
-      console.error('Error submitting form:', error);
-    }
-  };
-
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>{tax ? 'Edit Tax' : 'Add Tax'}</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <FormControl id="name" isRequired>
-            <FormLabel>Name</FormLabel>
-            <Input
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Enter tax name"
-            />
-          </FormControl>
-          <FormControl id="rate" isRequired mt={4}>
-            <FormLabel>Rate</FormLabel>
-            <NumberInput
-              value={formData.rate}
-              onChange={handleRateChange}
-              min={0}
-            >
-              <NumberInputField name="rate" />
-            </NumberInput>
-          </FormControl>
-        </ModalBody>
-        <ModalFooter>
-          <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
-            {tax ? 'Update Tax' : 'Add Tax'}
-          </Button>
-          <Button onClick={onClose}>Close</Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+    <form onSubmit={formik.handleSubmit}>
+      <FormControl>
+        <FormLabel>Tax Name</FormLabel>
+        <Input
+          name="name"
+          value={formik.values.name}
+          onChange={formik.handleChange}
+          placeholder="Enter tax name"
+        />
+      </FormControl>
+      <FormControl mt={4}>
+        <FormLabel>Rate</FormLabel>
+        <Input
+          name="rate"
+          type="number"
+          value={formik.values.rate}
+          onChange={formik.handleChange}
+          placeholder="Enter tax rate"
+        />
+      </FormControl>
+      <Button type="submit" colorScheme="blue" mt={4}>
+        Save
+      </Button>
+    </form>
   );
 };
 

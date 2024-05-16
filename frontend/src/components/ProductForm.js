@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { addProduct, updateProduct } from '../api/productApi';
-import { Button, Input, FormControl, FormLabel, Textarea } from '@chakra-ui/react';
+import { Button, Input, FormControl, FormLabel, Select } from '@chakra-ui/react';
 import { v4 as uuidv4 } from 'uuid';
+import { getBrands, addBrand } from '../api/brandApi';
+import { getCategories, addCategory } from '../api/categoryApi';
+import 'react-quill/dist/quill.snow.css';
+import ReactQuill from 'react-quill';
 
 const ProductForm = ({ product, onSubmit }) => {
   const initialFormState = {
@@ -18,10 +22,13 @@ const ProductForm = ({ product, onSubmit }) => {
     purchasePrice: '',
     stock: '',
     fakeStock: '',
-    criticalStock: ''
+    criticalStock: '',
+    uniqueId: uuidv4(),
   };
 
   const [formState, setFormState] = useState(initialFormState);
+  const [brands, setBrands] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     if (product) {
@@ -31,9 +38,54 @@ const ProductForm = ({ product, onSubmit }) => {
     }
   }, [product]);
 
+  useEffect(() => {
+    const fetchBrandsAndCategories = async () => {
+      try {
+        const brandsData = await getBrands();
+        const categoriesData = await getCategories();
+        setBrands(brandsData);
+        setCategories(categoriesData);
+      } catch (error) {
+        console.error('Error fetching brands or categories:', error);
+      }
+    };
+    fetchBrandsAndCategories();
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormState({ ...formState, [name]: value });
+  };
+
+  const handleBarcodeGenerate = () => {
+    const randomBarcode = '84' + Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0');
+    setFormState({ ...formState, barcode: randomBarcode });
+  };
+
+  const handleBrandAdd = async () => {
+    const newBrand = prompt('Enter new brand');
+    if (newBrand) {
+      try {
+        const addedBrand = await addBrand({ name: newBrand });
+        setBrands([...brands, addedBrand]);
+        setFormState({ ...formState, brand: addedBrand.name });
+      } catch (error) {
+        console.error('Error adding brand:', error);
+      }
+    }
+  };
+
+  const handleCategoryAdd = async () => {
+    const newCategory = prompt('Enter new category');
+    if (newCategory) {
+      try {
+        const addedCategory = await addCategory({ name: newCategory });
+        setCategories([...categories, addedCategory]);
+        setFormState({ ...formState, category: addedCategory.name });
+      } catch (error) {
+        console.error('Error adding category:', error);
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -42,7 +94,7 @@ const ProductForm = ({ product, onSubmit }) => {
       if (product) {
         await updateProduct(product._id, formState);
       } else {
-        await addProduct({ ...formState, uniqueId: uuidv4() });
+        await addProduct(formState);
       }
       setFormState(initialFormState);
       onSubmit();
@@ -84,26 +136,37 @@ const ProductForm = ({ product, onSubmit }) => {
           onChange={handleChange}
           required
         />
+        <Button onClick={handleBarcodeGenerate}>Generate Barcode</Button>
       </FormControl>
       <FormControl>
         <FormLabel>Brand</FormLabel>
-        <Input
-          type="text"
+        <Select
           name="brand"
           value={formState.brand}
           onChange={handleChange}
           required
-        />
+        >
+          <option value="">Select a brand</option>
+          {brands.map((brand) => (
+            <option key={brand._id} value={brand.name}>{brand.name}</option>
+          ))}
+        </Select>
+        <Button onClick={handleBrandAdd}>+ Add Brand</Button>
       </FormControl>
       <FormControl>
         <FormLabel>Category</FormLabel>
-        <Input
-          type="text"
+        <Select
           name="category"
           value={formState.category}
           onChange={handleChange}
           required
-        />
+        >
+          <option value="">Select a category</option>
+          {categories.map((category) => (
+            <option key={category._id} value={category.name}>{category.name}</option>
+          ))}
+        </Select>
+        <Button onClick={handleCategoryAdd}>+ Add Category</Button>
       </FormControl>
       <FormControl>
         <FormLabel>Weight</FormLabel>
@@ -116,10 +179,9 @@ const ProductForm = ({ product, onSubmit }) => {
       </FormControl>
       <FormControl>
         <FormLabel>Description</FormLabel>
-        <Textarea
-          name="description"
+        <ReactQuill
           value={formState.description}
-          onChange={handleChange}
+          onChange={(value) => setFormState({ ...formState, description: value })}
         />
       </FormControl>
       <FormControl>
