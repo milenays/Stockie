@@ -48,8 +48,8 @@ const fetchTrendyolOrders = async (req, res) => {
     const existingOrders = await Order.find();
     const updatedOrders = [];
 
-    orders.forEach((order) => {
-      const existingOrder = existingOrders.find(o => o.orderNumber === order.orderNumber);
+    for (let order of orders) {
+      let existingOrder = existingOrders.find(o => o.orderNumber === order.orderNumber);
       if (!existingOrder) {
         const newOrder = new Order({
           orderNumber: order.orderNumber,
@@ -63,18 +63,18 @@ const fetchTrendyolOrders = async (req, res) => {
           cargoProviderName: order.cargoProviderName,
         });
         updatedOrders.push(newOrder);
-        newOrder.save();
+        await newOrder.save();
       } else if (existingOrder.status !== order.status) {
         existingOrder.status = order.status;
-        existingOrder.save();
+        await existingOrder.save();
         updatedOrders.push(existingOrder);
       }
-    });
+    }
 
     res.status(200).json({ orders: updatedOrders });
   } catch (error) {
-    console.error('Error fetching Trendyol orders:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error('Error fetching Trendyol orders:', error.message);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 };
 
