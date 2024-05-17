@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { fetchTrendyolOrders, getOrders } from '../api/orderApi';
+import React from 'react';
 import {
   Table,
   Thead,
@@ -11,50 +10,24 @@ import {
   Button,
   Box,
   Heading,
-  Flex,
-  Text,
-  Spinner,
 } from '@chakra-ui/react';
+import { fetchTrendyolOrders } from '../api/orderApi';
 
-const OrderList = () => {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  const fetchOrders = async () => {
-    try {
-      const fetchedOrders = await getOrders();
-      setOrders(fetchedOrders);
-    } catch (error) {
-      console.error('Error fetching orders:', error);
-    }
+const OrderList = ({ orders }) => {
+  const handleFetchOrders = async () => {
+    await fetchTrendyolOrders();
   };
-
-  const handleFetchTrendyolOrders = async () => {
-    setLoading(true);
-    try {
-      await fetchTrendyolOrders();
-      fetchOrders(); // Fetch the orders again after fetching from Trendyol
-    } catch (error) {
-      console.error('Error fetching Trendyol orders:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
 
   return (
-    <Box p={4}>
-      <Flex justifyContent="space-between" alignItems="center" mb={4}>
-        <Heading>Orders</Heading>
-        <Button onClick={handleFetchTrendyolOrders} colorScheme="teal" isLoading={loading}>
-          Fetch Orders from Trendyol
-        </Button>
-      </Flex>
+    <Box p={5}>
+      <Heading size="lg" mb={5}>
+        Orders
+      </Heading>
+      <Button onClick={handleFetchOrders} colorScheme="teal" mb={5}>
+        Fetch Orders from Trendyol
+      </Button>
       <TableContainer>
-        <Table variant="striped" colorScheme="teal">
+        <Table variant="simple">
           <Thead>
             <Tr>
               <Th>Order ID</Th>
@@ -65,9 +38,9 @@ const OrderList = () => {
           </Thead>
           <Tbody>
             {orders.map((order) => (
-              <Tr key={order._id}>
-                <Td>{order.orderId}</Td>
-                <Td>{order.customerName}</Td>
+              <Tr key={order.orderNumber}>
+                <Td>{order.orderNumber}</Td>
+                <Td>{`${order.customerFirstName} ${order.customerLastName}`}</Td>
                 <Td>{order.totalPrice}</Td>
                 <Td>{order.status}</Td>
               </Tr>
@@ -75,7 +48,6 @@ const OrderList = () => {
           </Tbody>
         </Table>
       </TableContainer>
-      {orders.length === 0 && !loading && <Text mt={4}>No orders found.</Text>}
     </Box>
   );
 };
