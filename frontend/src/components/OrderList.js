@@ -1,25 +1,48 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Table, Thead, Tbody, Tr, Th, Td, Button } from '@chakra-ui/react';
+import React, { useEffect, useState } from 'react';
+import {
+  Box,
+  Button,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  useToast,
+} from '@chakra-ui/react';
+import { getOrders, fetchTrendyolOrders } from '../api/orderApi';
 
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
+  const toast = useToast();
 
   const fetchOrders = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/orders');
-      setOrders(data);
+      const fetchedOrders = await getOrders();
+      setOrders(fetchedOrders);
     } catch (error) {
       console.error('Error fetching orders:', error);
+      toast({
+        title: 'Error fetching orders.',
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
     }
   };
 
-  const fetchOrdersFromTrendyol = async () => {
+  const handleFetchTrendyolOrders = async () => {
     try {
-      await axios.get('http://localhost:5000/api/trendyol/fetch-orders');
+      await fetchTrendyolOrders();
       fetchOrders();
     } catch (error) {
-      console.error('Error fetching orders from Trendyol:', error);
+      console.error('Error fetching Trendyol orders:', error);
+      toast({
+        title: 'Error fetching Trendyol orders.',
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
     }
   };
 
@@ -28,9 +51,11 @@ const OrderList = () => {
   }, []);
 
   return (
-    <div>
-      <Button onClick={fetchOrdersFromTrendyol}>Fetch Orders from Trendyol</Button>
-      <Table>
+    <Box p={5}>
+      <Button onClick={handleFetchTrendyolOrders} mb={5}>
+        Fetch Orders from Trendyol
+      </Button>
+      <Table variant="simple">
         <Thead>
           <Tr>
             <Th>Order ID</Th>
@@ -41,16 +66,16 @@ const OrderList = () => {
         </Thead>
         <Tbody>
           {orders.map((order) => (
-            <Tr key={order.orderId}>
+            <Tr key={order.id}>
               <Td>{order.orderId}</Td>
-              <Td>{order.customerName}</Td>
+              <Td>{order.customer.name}</Td>
               <Td>{order.totalPrice}</Td>
               <Td>{order.status}</Td>
             </Tr>
           ))}
         </Tbody>
       </Table>
-    </div>
+    </Box>
   );
 };
 
