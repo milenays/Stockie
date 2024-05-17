@@ -42,21 +42,30 @@ const fetchTrendyolOrders = async (req, res) => {
     });
 
     const orders = response.data.content;
-    console.log(orders); // Trendyol'dan gelen veriyi kontrol edelim
 
     for (const order of orders) {
       const existingOrder = await Order.findOne({ orderId: order.id });
+      const orderData = {
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        customerName: `${order.customerFirstName} ${order.customerLastName}`,
+        address: order.shipmentAddress.address1,
+        city: order.shipmentAddress.city,
+        district: order.shipmentAddress.district,
+        totalPrice: order.grossAmount,
+        cargoTrackingNumber: order.cargoTrackingNumber,
+        cargoProviderName: order.cargoProviderName,
+        status: order.status,
+        orderLines: order.lines.map(line => ({
+          quantity: line.quantity,
+          productName: line.productName
+        }))
+      };
+
       if (existingOrder) {
-        existingOrder.status = order.status;
-        await existingOrder.save();
+        await Order.updateOne({ orderId: order.id }, orderData);
       } else {
-        const newOrder = new Order({
-          orderId: order.id,
-          customerName: order.customer ? order.customer.fullName : 'Unknown',
-          totalPrice: order.totalPrice,
-          status: order.status,
-          // Diğer alanları ekleyin
-        });
+        const newOrder = new Order(orderData);
         await newOrder.save();
       }
     }
