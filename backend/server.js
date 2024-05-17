@@ -11,6 +11,7 @@ const tagRoutes = require('./routes/tagRoutes');
 const taxRoutes = require('./routes/taxRoutes');
 const variantRoutes = require('./routes/variantRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const trendyolRoutes = require('./routes/trendyolRoutes'); // Bu satır eklendi
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/tags', tagRoutes);
 app.use('/api/taxes', taxRoutes);
 app.use('/api/variants', variantRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/trendyol', trendyolRoutes); // Bu satır eklendi
 
 mongoose
   .connect('mongodb://localhost/stockie', { useNewUrlParser: true, useUnifiedTopology: true })

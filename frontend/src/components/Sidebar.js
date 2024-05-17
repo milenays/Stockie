@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Box, Flex, Text, Stack, Collapse, useDisclosure, Icon } from '@chakra-ui/react';
-import { MdDashboard, MdShoppingCart, MdCategory, MdBrandingWatermark, MdLocalOffer, MdPeople, MdLocalShipping, MdTag, MdAttachMoney, MdExpandMore, MdExpandLess, MdViewList } from 'react-icons/md';
+import { MdDashboard, MdShoppingCart, MdCategory, MdBrandingWatermark, MdLocalOffer, MdPeople, MdLocalShipping, MdTag, MdAttachMoney, MdExpandMore, MdExpandLess, MdViewList, MdSettings, MdIntegrationInstructions } from 'react-icons/md';
 
 const Sidebar = () => {
   const { isOpen, onToggle } = useDisclosure();
+  const { isOpen: isSettingsOpen, onToggle: onSettingsToggle } = useDisclosure();
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
@@ -81,6 +82,23 @@ const Sidebar = () => {
                 <Flex align="center" p={2} bg={isActive('/suppliers') ? 'teal.700' : 'teal.500'} borderRadius="md">
                   <Icon as={MdLocalShipping} mr={2} />
                   <Text>Suppliers</Text>
+                </Flex>
+              </Link>
+            </Stack>
+          </Collapse>
+        </Box>
+        <Box>
+          <Flex align="center" p={2} bg="teal.500" borderRadius="md" onClick={onSettingsToggle} cursor="pointer">
+            <Icon as={MdSettings} mr={2} />
+            <Text>Settings</Text>
+            <Icon as={isSettingsOpen ? MdExpandLess : MdExpandMore} ml="auto" />
+          </Flex>
+          <Collapse in={isSettingsOpen}>
+            <Stack pl={4} mt={2} spacing={2}>
+              <Link to="/integrations">
+                <Flex align="center" p={2} bg={isActive('/integrations') ? 'teal.700' : 'teal.500'} borderRadius="md">
+                  <Icon as={MdIntegrationInstructions} mr={2} />
+                  <Text>Integrations</Text>
                 </Flex>
               </Link>
             </Stack>

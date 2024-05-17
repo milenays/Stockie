@@ -1,104 +1,56 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Box,
-  Button,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  IconButton,
-  useDisclosure,
-} from '@chakra-ui/react';
-import { EditIcon, DeleteIcon } from '@chakra-ui/icons';
-import { getOrders } from '../api/orderApi';
-import OrderForm from './OrderForm';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Table, Thead, Tbody, Tr, Th, Td, Button } from '@chakra-ui/react';
 
-const OrderList = ({ onEdit, onDelete }) => {
+const OrderList = () => {
   const [orders, setOrders] = useState([]);
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [currentOrder, setCurrentOrder] = useState(null);
+
+  const fetchOrders = async () => {
+    try {
+      const { data } = await axios.get('http://localhost:5000/api/orders');
+      setOrders(data);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    }
+  };
+
+  const fetchOrdersFromTrendyol = async () => {
+    try {
+      await axios.get('http://localhost:5000/api/trendyol/fetch-orders');
+      fetchOrders();
+    } catch (error) {
+      console.error('Error fetching orders from Trendyol:', error);
+    }
+  };
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
-  const fetchOrders = async () => {
-    const data = await getOrders();
-    setOrders(data);
-  };
-
-  const handleEdit = (order) => {
-    setCurrentOrder(order);
-    onOpen();
-  };
-
-  const handleDelete = (orderId) => {
-    onDelete(orderId);
-    fetchOrders();
-  };
-
   return (
-    <Box>
-      <Table variant="simple">
+    <div>
+      <Button onClick={fetchOrdersFromTrendyol}>Fetch Orders from Trendyol</Button>
+      <Table>
         <Thead>
           <Tr>
             <Th>Order ID</Th>
-            <Th>Cargo</Th>
-            <Th>Cargo Number</Th>
             <Th>Customer</Th>
-            <Th>Order Products</Th>
             <Th>Total Price</Th>
             <Th>Status</Th>
-            <Th>Actions</Th>
           </Tr>
         </Thead>
         <Tbody>
-          {orders.length === 0 ? (
-            <Tr>
-              <Td colSpan="8" textAlign="center">No Orders Found</Td>
+          {orders.map((order) => (
+            <Tr key={order.orderId}>
+              <Td>{order.orderId}</Td>
+              <Td>{order.customerName}</Td>
+              <Td>{order.totalPrice}</Td>
+              <Td>{order.status}</Td>
             </Tr>
-          ) : (
-            orders.map((order) => (
-              <Tr key={order._id}>
-                <Td>{order.orderId}</Td>
-                <Td>{order.cargo}</Td>
-                <Td>{order.cargoNumber}</Td>
-                <Td>{order.customer.name}</Td>
-                <Td>{order.orderProducts.map((product) => (
-                  <Box key={product.productId}>
-                    {product.name} - {product.quantity} x ${product.salePrice}
-                  </Box>
-                ))}</Td>
-                <Td>${order.totalPrice}</Td>
-                <Td>{order.status}</Td>
-                <Td>
-                  <IconButton
-                    icon={<EditIcon />}
-                    onClick={() => handleEdit(order)}
-                    mr={2}
-                  />
-                  <IconButton
-                    icon={<DeleteIcon />}
-                    onClick={() => handleDelete(order._id)}
-                  />
-                </Td>
-              </Tr>
-            ))
-          )}
+          ))}
         </Tbody>
       </Table>
-      <OrderForm
-        isOpen={isOpen}
-        onClose={onClose}
-        onSave={(order) => {
-          onEdit(order);
-          fetchOrders();
-        }}
-        order={currentOrder}
-      />
-    </Box>
+    </div>
   );
 };
 

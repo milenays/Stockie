@@ -13,6 +13,7 @@ import TaxPage from './pages/TaxPage';
 import VariantPage from './pages/VariantPage';
 import OrderPage from './pages/OrderPage';
 import ProductForm from './components/ProductForm';
+import IntegrationsPage from './pages/IntegrationsPage';
 import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure } from "@chakra-ui/react";
 
 const App = () => {
@@ -33,6 +34,7 @@ const App = () => {
             <Route exact path="/taxes" component={TaxPage} />
             <Route exact path="/variants" component={VariantPage} />
             <Route exact path="/orders" component={OrderPage} />
+            <Route exact path="/integrations" component={IntegrationsPage} />
           </Switch>
           <Route path="/products/add">
             <Modal isOpen={isOpen} onClose={onClose}>

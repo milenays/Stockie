@@ -1,64 +1,54 @@
 const Order = require('../models/orderModel');
+const { fetchOrders } = require('../api/trendyolApi');
 
-// Get all orders
 const getOrders = async (req, res) => {
   try {
     const orders = await Order.find({});
-    res.json(orders);
+    res.status(200).json(orders);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Siparişler getirilemedi', error });
   }
 };
 
-// Get single order
-const getOrder = async (req, res) => {
-  try {
-    const order = await Order.findById(req.params.id);
-    if (order) {
-      res.json(order);
-    } else {
-      res.status(404).json({ message: 'Order not found' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Add new order
 const addOrder = async (req, res) => {
-  try {
-    const newOrder = new Order(req.body);
-    const savedOrder = await newOrder.save();
-    res.status(201).json(savedOrder);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
+  // Add order logic
 };
 
-// Update order
 const updateOrder = async (req, res) => {
-  try {
-    const updatedOrder = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(updatedOrder);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
+  // Update order logic
 };
 
-// Delete order
 const deleteOrder = async (req, res) => {
+  // Delete order logic
+};
+
+const fetchTrendyolOrders = async (req, res) => {
   try {
-    const deletedOrder = await Order.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Order deleted' });
+    const orders = await fetchOrders();
+
+    // Trendyol'dan gelen siparişleri işle ve veritabanına ekle/güncelle
+    for (const order of orders) {
+      const existingOrder = await Order.findOne({ orderId: order.id });
+      if (existingOrder) {
+        existingOrder.status = order.status;
+        await existingOrder.save();
+      } else {
+        await Order.create({
+          orderId: order.id,
+          customer: order.customer,
+          products: order.products,
+          totalPrice: order.totalPrice,
+          cargo: order.cargo,
+          cargoNumber: order.cargoNumber,
+          status: order.status
+        });
+      }
+    }
+
+    res.status(200).json({ message: 'Siparişler başarıyla güncellendi' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Siparişler güncellenemedi', error });
   }
 };
 
-module.exports = {
-  getOrders,
-  getOrder,
-  addOrder,
-  updateOrder,
-  deleteOrder
-};
+module.exports = { getOrders, addOrder, updateOrder, deleteOrder, fetchTrendyolOrders };
