@@ -1,3 +1,7 @@
+const axios = require('axios');
+const Integration = require('../models/integrationModel');
+const Order = require('../models/orderModel');
+
 const fetchTrendyolOrders = async (req, res) => {
   try {
     const integration = await Integration.findOne();
@@ -50,3 +54,25 @@ const fetchTrendyolOrders = async (req, res) => {
     res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 };
+
+const saveIntegration = async (req, res) => {
+  try {
+    const { apiKey, apiSecret, sellerId } = req.body;
+
+    const integration = await Integration.findOneAndUpdate({}, { apiKey, apiSecret, sellerId }, { upsert: true, new: true });
+
+    res.status(200).json({ message: 'Integration saved successfully.', integration });
+  } catch (error) {
+    console.error('Error saving integration:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+};
+
+const getIntegrationStatus = async (req, res) => {
+  try {
+    const integration = await Integration.findOne();
+    if (!integration) {
+      return res.status(404).json({ message: 'No integration found' });
+    }
+    res.status(200).json(integration);
+  } catch (error)
