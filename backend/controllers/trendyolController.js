@@ -75,4 +75,10 @@ const getIntegrationStatus = async (req, res) => {
       return res.status(404).json({ message: 'No integration found' });
     }
     res.status(200).json(integration);
-  } catch (error)
+  } catch (error) {
+    console.error('Error fetching integration status:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+};
+
+module.exports = { fetchTrendyolOrders, saveIntegration, getIntegrationStatus };
