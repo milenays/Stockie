@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useFormik, Formik, Form, Field, FieldArray } from 'formik';
+import { useFormik, Formik, Form, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import {
   Modal,
@@ -18,7 +18,7 @@ import {
   NumberInputField,
   Box,
 } from '@chakra-ui/react';
-import { addOrder, updateOrder, getOrder, getProducts } from '../api/orderApi';
+import { addOrder, updateOrder, getProducts } from '../api/orderApi';
 
 const OrderForm = ({ isOpen, onClose, onSave, order }) => {
   const [products, setProducts] = useState([]);
@@ -158,7 +158,7 @@ const OrderForm = ({ isOpen, onClose, onSave, order }) => {
                   render={arrayHelpers => (
                     <div>
                       {values.orderProducts.map((product, index) => (
-                        <Box key={index} display="flex" alignItems="center">
+                        <Box key={index} display="flex" alignItems="center" mb={2}>
                           <FormControl isRequired>
                             <FormLabel>Product</FormLabel>
                             <Select
@@ -180,6 +180,8 @@ const OrderForm = ({ isOpen, onClose, onSave, order }) => {
                               name={`orderProducts.${index}.quantity`}
                               onChange={(valueString) => setFieldValue(`orderProducts.${index}.quantity`, parseInt(valueString))}
                               value={product.quantity}
+                              maxW="100px"
+                              mr="2"
                             >
                               <NumberInputField />
                             </NumberInput>
@@ -192,6 +194,8 @@ const OrderForm = ({ isOpen, onClose, onSave, order }) => {
                               name={`orderProducts.${index}.price`}
                               onChange={(valueString) => setFieldValue(`orderProducts.${index}.price`, parseFloat(valueString))}
                               value={product.price}
+                              maxW="100px"
+                              mr="2"
                             >
                               <NumberInputField />
                             </NumberInput>

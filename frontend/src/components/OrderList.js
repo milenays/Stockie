@@ -9,10 +9,16 @@ import {
   Td,
   TableContainer,
   Button,
+  Box,
+  Heading,
+  Flex,
+  Text,
+  Spinner,
 } from '@chakra-ui/react';
 
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const fetchOrders = async () => {
     try {
@@ -24,11 +30,14 @@ const OrderList = () => {
   };
 
   const handleFetchTrendyolOrders = async () => {
+    setLoading(true);
     try {
       await fetchTrendyolOrders();
       fetchOrders(); // Fetch the orders again after fetching from Trendyol
     } catch (error) {
       console.error('Error fetching Trendyol orders:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -37,12 +46,15 @@ const OrderList = () => {
   }, []);
 
   return (
-    <div>
-      <Button onClick={handleFetchTrendyolOrders} colorScheme="teal" mb={4}>
-        Fetch Orders from Trendyol
-      </Button>
+    <Box p={4}>
+      <Flex justifyContent="space-between" alignItems="center" mb={4}>
+        <Heading>Orders</Heading>
+        <Button onClick={handleFetchTrendyolOrders} colorScheme="teal" isLoading={loading}>
+          Fetch Orders from Trendyol
+        </Button>
+      </Flex>
       <TableContainer>
-        <Table variant="simple">
+        <Table variant="striped" colorScheme="teal">
           <Thead>
             <Tr>
               <Th>Order ID</Th>
@@ -63,7 +75,8 @@ const OrderList = () => {
           </Tbody>
         </Table>
       </TableContainer>
-    </div>
+      {orders.length === 0 && !loading && <Text mt={4}>No orders found.</Text>}
+    </Box>
   );
 };
 
