@@ -1,28 +1,7 @@
 const axios = require('axios');
 const Integration = require('../models/integrationModel');
+const Order = require('../models/orderModel');
 
-// Function to save integration details
-const saveIntegration = async (req, res) => {
-  const { apiKey, apiSecret, sellerId } = req.body;
-  try {
-    let integration = await Integration.findOne();
-    if (integration) {
-      integration.apiKey = apiKey;
-      integration.apiSecret = apiSecret;
-      integration.sellerId = sellerId;
-      await integration.save();
-    } else {
-      integration = new Integration({ apiKey, apiSecret, sellerId });
-      await integration.save();
-    }
-    res.status(200).json({ message: 'Integration details saved successfully' });
-  } catch (error) {
-    console.error('Error saving integration details:', error.message);
-    res.status(500).json({ message: 'Error saving integration details', error: error.message });
-  }
-};
-
-// Function to fetch orders from Trendyol
 const fetchTrendyolOrders = async (req, res) => {
   try {
     const integration = await Integration.findOne();
@@ -30,34 +9,39 @@ const fetchTrendyolOrders = async (req, res) => {
       return res.status(404).json({ message: 'No integration found' });
     }
 
-    const { apiKey, apiSecret, sellerId } = integration;
-    const url = `https://api.trendyol.com/sapigw/suppliers/${sellerId}/orders`;
-    const response = await axios.get(url, {
+    const response = await axios.get('https://api.trendyol.com/sapigw/suppliers/{supplierId}/orders', {
       headers: {
-        'Authorization': `Basic ${Buffer.from(`${apiKey}:${apiSecret}`).toString('base64')}`
+        'Authorization': `Basic ${Buffer.from(`${integration.apiKey}:${integration.apiSecret}`).toString('base64')}`,
+        'Content-Type': 'application/json'
+      },
+      params: {
+        status: 'Created,Picking'
       }
     });
 
-    res.status(200).json(response.data);
-  } catch (error) {
-    console.error('Error fetching orders:', error.message);
-    res.status(500).json({ message: 'Error fetching orders', error: error.message });
-  }
-};
-
-// Function to get integration status
-const getIntegrationStatus = async (req, res) => {
-  try {
-    const integration = await Integration.findOne();
-    if (integration) {
-      res.status(200).json(integration);
-    } else {
-      res.status(404).json({ message: 'No integration found' });
+    const orders = response.data.content;
+    for (const order of orders) {
+      const existingOrder = await Order.findOne({ orderId: order.id });
+      if (existingOrder) {
+        existingOrder.status = order.status;
+        await existingOrder.save();
+      } else {
+        const newOrder = new Order({
+          orderId: order.id,
+          customerName: order.customer.fullName,
+          totalPrice: order.totalPrice,
+          status: order.status,
+          // Diğer alanları ekleyin
+        });
+        await newOrder.save();
+      }
     }
+
+    res.status(200).json({ message: 'Orders fetched and saved successfully.' });
   } catch (error) {
-    console.error('Error fetching integration status:', error.message);
-    res.status(500).json({ message: 'Error fetching integration status', error: error.message });
+    console.error('Error fetching Trendyol orders:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 };
 
-module.exports = { saveIntegration, fetchTrendyolOrders, getIntegrationStatus };
+module.exports = { fetchTrendyolOrders, saveIntegration, getIntegrationStatus };
