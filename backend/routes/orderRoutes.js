@@ -1,21 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const {
-  getOrders,
-  addOrder,
-  deleteOrder,
-  updateOrder
-} = require('../controllers/orderControllers');
-const {
-  fetchTrendyolOrders,
-  saveIntegration,
-  getIntegrationStatus
-} = require('../controllers/trendyolController');
+const { getOrders, createOrder, deleteOrder, fetchOrdersFromTrendyol } = require('../controllers/orderControllers');
 
-router.route('/').get(getOrders).post(addOrder);
-router.route('/:id').delete(deleteOrder).put(updateOrder);
-router.route('/trendyol/fetch-orders').get(fetchTrendyolOrders);
-router.route('/trendyol/save-integration').post(saveIntegration);
-router.route('/trendyol/integration-status').get(getIntegrationStatus);
+router.route('/')
+  .get(getOrders)
+  .post(createOrder);
+
+router.route('/:id')
+  .delete(deleteOrder);
+
+router.get('/fetch-orders', fetchOrdersFromTrendyol);
 
 module.exports = router;
