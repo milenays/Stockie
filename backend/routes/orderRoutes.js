@@ -1,16 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const { getOrders, addOrder, updateOrder, deleteOrder, fetchTrendyolOrders } = require('../controllers/orderControllers');
+const {
+  getOrders,
+  addOrder,
+  deleteOrder,
+  updateOrder
+} = require('../controllers/orderControllers');
+const {
+  fetchTrendyolOrders,
+  saveIntegration,
+  getIntegrationStatus
+} = require('../controllers/trendyolController');
 
-// Order routes
-router.route('/')
-  .get(getOrders)  // Bu satırdaki hatanın nedeni muhtemelen getOrders fonksiyonunun tanımlı olmaması
-  .post(addOrder);
-
-router.route('/:id')
-  .put(updateOrder)
-  .delete(deleteOrder);
-
-router.post('/fetch-trendyol', fetchTrendyolOrders);
+router.route('/').get(getOrders).post(addOrder);
+router.route('/:id').delete(deleteOrder).put(updateOrder);
+router.route('/trendyol/fetch-orders').get(fetchTrendyolOrders);
+router.route('/trendyol/save-integration').post(saveIntegration);
+router.route('/trendyol/integration-status').get(getIntegrationStatus);
 
 module.exports = router;
