@@ -1,9 +1,25 @@
 const mongoose = require('mongoose');
 
 const integrationSchema = new mongoose.Schema({
-  apiKey: { type: String, required: true },
-  apiSecret: { type: String, required: true },
-  sellerId: { type: String, required: true }
+  platform: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  apiKey: {
+    type: String,
+    required: true
+  },
+  apiSecret: {
+    type: String,
+    required: true
+  },
+  sellerId: {
+    type: String,
+    required: true
+  }
 });
 
-module.exports = mongoose.model('Integration', integrationSchema);
+const Integration = mongoose.model('Integration', integrationSchema);
+
+module.exports = Integration;

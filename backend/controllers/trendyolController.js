@@ -1,83 +1,80 @@
 const axios = require('axios');
-const Integration = require('../models/integrationModel');
 const Order = require('../models/orderModel');
+const Integration = require('../models/integrationModel');
 
-const fetchTrendyolOrders = async (req, res) => {
-  try {
-    const integration = await Integration.findOne();
-    if (!integration) {
-      return res.status(404).json({ message: 'No integration found' });
-    }
-
-    const response = await axios.get(`https://api.trendyol.com/sapigw/suppliers/${integration.sellerId}/orders`, {
-      headers: {
-        'Authorization': `Basic ${Buffer.from(`${integration.apiKey}:${integration.apiSecret}`).toString('base64')}`,
-        'Content-Type': 'application/json'
-      },
-      params: {
-        status: 'Created,Picking'
-      }
-    });
-
-    const orders = response.data.content;
-
-    for (const order of orders) {
-      const existingOrder = await Order.findOne({ orderId: order.id });
-      const orderData = {
-        orderId: order.id,
-        orderNumber: order.orderNumber,
-        customerName: `${order.customerFirstName} ${order.customerLastName}`,
-        address: order.shipmentAddress.address1,
-        city: order.shipmentAddress.city,
-        district: order.shipmentAddress.district,
-        totalPrice: order.grossAmount,
-        cargoTrackingNumber: order.cargoTrackingNumber,
-        cargoProviderName: order.cargoProviderName,
-        status: order.status,
-        orderLines: order.lines.map(line => ({
-          quantity: line.quantity,
-          productName: line.productName
-        }))
-      };
-
-      if (existingOrder) {
-        await Order.updateOne({ orderId: order.id }, orderData);
-      } else {
-        const newOrder = new Order(orderData);
-        await newOrder.save();
-      }
-    }
-
-    res.status(200).json({ message: 'Orders fetched and saved successfully.' });
-  } catch (error) {
-    console.error('Error fetching Trendyol orders:', error);
-    res.status(500).json({ message: 'Internal server error', error: error.message });
-  }
-};
+const TRENDYOL_ORDERS_API_URL = 'https://api.trendyol.com/sapigw/suppliers/<your_supplier_id>/orders';
 
 const saveIntegration = async (req, res) => {
+  const { apiKey, apiSecret, sellerId } = req.body;
   try {
-    const { apiKey, apiSecret, sellerId } = req.body;
-
-    const integration = await Integration.findOneAndUpdate({}, { apiKey, apiSecret, sellerId }, { upsert: true, new: true });
-
-    res.status(200).json({ message: 'Integration saved successfully.', integration });
+    const integration = await Integration.findOneAndUpdate(
+      { platform: 'Trendyol' },
+      { apiKey, apiSecret, sellerId },
+      { upsert: true, new: true }
+    );
+    res.status(200).json({ message: 'Integration saved successfully', integration });
   } catch (error) {
-    console.error('Error saving integration:', error);
-    res.status(500).json({ message: 'Internal server error', error: error.message });
+    res.status(500).json({ message: 'Error saving integration', error });
   }
 };
 
 const getIntegrationStatus = async (req, res) => {
   try {
-    const integration = await Integration.findOne();
+    const integration = await Integration.findOne({ platform: 'Trendyol' });
     if (!integration) {
       return res.status(404).json({ message: 'No integration found' });
     }
     res.status(200).json(integration);
   } catch (error) {
-    console.error('Error fetching integration status:', error);
     res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+};
+
+const fetchTrendyolOrders = async (req, res) => {
+  try {
+    const integration = await Integration.findOne({ platform: 'Trendyol' });
+    if (!integration) {
+      return res.status(404).json({ message: 'No integration found' });
+    }
+
+    const response = await axios.get(TRENDYOL_ORDERS_API_URL, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${Buffer.from(`${integration.apiKey}:${integration.apiSecret}`).toString('base64')}`
+      }
+    });
+
+    const orders = response.data.content;
+    const existingOrders = await Order.find();
+    const updatedOrders = [];
+
+    orders.forEach((order) => {
+      const existingOrder = existingOrders.find(o => o.orderNumber === order.orderNumber);
+      if (!existingOrder) {
+        const newOrder = new Order({
+          orderNumber: order.orderNumber,
+          customerFirstName: order.customerFirstName,
+          customerLastName: order.customerLastName,
+          totalPrice: order.totalPrice,
+          status: order.status,
+          shipmentAddress: order.shipmentAddress,
+          lines: order.lines,
+          cargoTrackingNumber: order.cargoTrackingNumber,
+          cargoProviderName: order.cargoProviderName,
+        });
+        updatedOrders.push(newOrder);
+        newOrder.save();
+      } else if (existingOrder.status !== order.status) {
+        existingOrder.status = order.status;
+        existingOrder.save();
+        updatedOrders.push(existingOrder);
+      }
+    });
+
+    res.status(200).json({ orders: updatedOrders });
+  } catch (error) {
+    console.error('Error fetching Trendyol orders:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 

@@ -15,7 +15,8 @@ export const getOrders = async () => {
 
 export const fetchTrendyolOrders = async () => {
   try {
-    await axios.get(`${integrationUrl}/fetch-orders`);
+    const response = await axios.get('http://localhost:5000/api/trendyol/fetch-orders');
+    return response.data.orders;
   } catch (error) {
     console.error('Error fetching Trendyol orders:', error);
     throw error;
