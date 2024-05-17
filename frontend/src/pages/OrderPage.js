@@ -1,80 +1,55 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Button, Table, Thead, Tbody, Tr, Th, Td, useToast } from '@chakra-ui/react';
-import { getOrders, fetchTrendyolOrders } from '../api/orderApi';
+import React, { useEffect, useState } from 'react';
+import { fetchTrendyolOrders, getOrders } from '../api/orderApi';
 
 const OrderPage = () => {
   const [orders, setOrders] = useState([]);
-  const toast = useToast();
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const fetchOrders = async () => {
-    try {
-      const data = await getOrders();
-      setOrders(data);
-    } catch (error) {
-      console.error('Error fetching orders:', error);
-      toast({
-        title: 'Error',
-        description: 'Error fetching orders.',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-    }
-  };
 
   const handleFetchTrendyolOrders = async () => {
     try {
-      await fetchTrendyolOrders();
-      fetchOrders(); // Refresh the order list
-      toast({
-        title: 'Success',
-        description: 'Orders fetched from Trendyol successfully.',
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
-      });
+      const response = await fetchTrendyolOrders();
+      setOrders(response);
     } catch (error) {
       console.error('Error fetching Trendyol orders:', error);
-      toast({
-        title: 'Error',
-        description: 'Error fetching orders from Trendyol.',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
     }
   };
 
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await getOrders();
+        setOrders(response);
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
   return (
-    <Box p={4}>
-      <Button colorScheme="teal" onClick={handleFetchTrendyolOrders}>
-        Fetch Orders from Trendyol
-      </Button>
-      <Table mt={4}>
-        <Thead>
-          <Tr>
-            <Th>Order ID</Th>
-            <Th>Customer</Th>
-            <Th>Total Price</Th>
-            <Th>Status</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {orders.map((order) => (
-            <Tr key={order._id}>
-              <Td>{order.orderId}</Td>
-              <Td>{order.customer.name}</Td>
-              <Td>{order.totalPrice}</Td>
-              <Td>{order.status}</Td>
-            </Tr>
+    <div>
+      <button onClick={handleFetchTrendyolOrders}>Fetch Orders from Trendyol</button>
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Total Price</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {orders.map(order => (
+            <tr key={order.orderId}>
+              <td>{order.orderNumber}</td>
+              <td>{order.customerName}</td>
+              <td>{order.totalPrice}</td>
+              <td>{order.status}</td>
+            </tr>
           ))}
-        </Tbody>
-      </Table>
-    </Box>
+        </tbody>
+      </table>
+    </div>
   );
 };
 
