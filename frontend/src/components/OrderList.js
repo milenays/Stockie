@@ -1,20 +1,18 @@
 import React, { useEffect, useState } from 'react';
+import { fetchTrendyolOrders, getOrders } from '../api/orderApi';
 import {
-  Box,
-  Button,
   Table,
   Thead,
   Tbody,
   Tr,
   Th,
   Td,
-  useToast,
+  TableContainer,
+  Button,
 } from '@chakra-ui/react';
-import { getOrders, fetchTrendyolOrders } from '../api/orderApi';
 
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
-  const toast = useToast();
 
   const fetchOrders = async () => {
     try {
@@ -22,27 +20,15 @@ const OrderList = () => {
       setOrders(fetchedOrders);
     } catch (error) {
       console.error('Error fetching orders:', error);
-      toast({
-        title: 'Error fetching orders.',
-        status: 'error',
-        duration: 2000,
-        isClosable: true,
-      });
     }
   };
 
   const handleFetchTrendyolOrders = async () => {
     try {
       await fetchTrendyolOrders();
-      fetchOrders();
+      fetchOrders(); // Fetch the orders again after fetching from Trendyol
     } catch (error) {
       console.error('Error fetching Trendyol orders:', error);
-      toast({
-        title: 'Error fetching Trendyol orders.',
-        status: 'error',
-        duration: 2000,
-        isClosable: true,
-      });
     }
   };
 
@@ -51,31 +37,33 @@ const OrderList = () => {
   }, []);
 
   return (
-    <Box p={5}>
-      <Button onClick={handleFetchTrendyolOrders} mb={5}>
+    <div>
+      <Button onClick={handleFetchTrendyolOrders} colorScheme="teal" mb={4}>
         Fetch Orders from Trendyol
       </Button>
-      <Table variant="simple">
-        <Thead>
-          <Tr>
-            <Th>Order ID</Th>
-            <Th>Customer</Th>
-            <Th>Total Price</Th>
-            <Th>Status</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {orders.map((order) => (
-            <Tr key={order.id}>
-              <Td>{order.orderId}</Td>
-              <Td>{order.customer.name}</Td>
-              <Td>{order.totalPrice}</Td>
-              <Td>{order.status}</Td>
+      <TableContainer>
+        <Table variant="simple">
+          <Thead>
+            <Tr>
+              <Th>Order ID</Th>
+              <Th>Customer</Th>
+              <Th>Total Price</Th>
+              <Th>Status</Th>
             </Tr>
-          ))}
-        </Tbody>
-      </Table>
-    </Box>
+          </Thead>
+          <Tbody>
+            {orders.map((order) => (
+              <Tr key={order._id}>
+                <Td>{order.orderId}</Td>
+                <Td>{order.customerName}</Td>
+                <Td>{order.totalPrice}</Td>
+                <Td>{order.status}</Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </TableContainer>
+    </div>
   );
 };
 
