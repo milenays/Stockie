@@ -39,14 +39,20 @@ const OrderPage = () => {
           </tr>
         </thead>
         <tbody>
-          {orders.map(order => (
-            <tr key={order.orderId}>
-              <td>{order.orderNumber}</td>
-              <td>{order.customerName}</td>
-              <td>{order.totalPrice}</td>
-              <td>{order.status}</td>
+          {orders && orders.length > 0 ? (
+            orders.map(order => (
+              <tr key={order.orderId}>
+                <td>{order.orderNumber}</td>
+                <td>{order.customerName}</td>
+                <td>{order.totalPrice}</td>
+                <td>{order.status}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="4">No orders found</td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>
