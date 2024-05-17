@@ -1,3 +1,4 @@
+const { fetchOrdersFromTrendyol } = require('../api/trendyolApi');
 const Integration = require('../models/integrationModel');
 
 const saveIntegration = async (req, res) => {
@@ -12,27 +13,20 @@ const saveIntegration = async (req, res) => {
   }
 };
 
-const getIntegrationStatus = async (req, res) => {
-  try {
-    const integration = await Integration.findOne();
-    res.status(200).json(integration);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch integration status', error });
-  }
-};
-
 const fetchTrendyolOrders = async (req, res) => {
   try {
-    // Fetch orders from Trendyol API using stored integration details
     const integration = await Integration.findOne();
     if (!integration) {
       return res.status(404).json({ message: 'No integration found' });
     }
-    const orders = await getOrdersFromTrendyol(integration.apiKey, integration.apiSecret, integration.sellerId);
+
+    const { apiKey, apiSecret, sellerId } = integration;
+    const orders = await fetchOrdersFromTrendyol(apiKey, apiSecret, sellerId);
+
     res.status(200).json(orders);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch orders', error });
+    console.error('Error fetching orders:', error.message);
+    res.status(500).json({ message: 'Error fetching orders', error: error.message });
   }
 };
-
 module.exports = { saveIntegration, fetchTrendyolOrders, getIntegrationStatus };

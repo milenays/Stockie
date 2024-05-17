@@ -1,4 +1,5 @@
 const Integration = require('../models/integrationModel');
+const axios = require('axios');
 
 const saveIntegration = async (req, res) => {
   const { apiKey, apiSecret, sellerId } = req.body;
