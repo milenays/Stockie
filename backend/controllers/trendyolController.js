@@ -42,6 +42,8 @@ const fetchTrendyolOrders = async (req, res) => {
     });
 
     const orders = response.data.content;
+    console.log(orders); // Trendyol'dan gelen veriyi kontrol edelim
+
     for (const order of orders) {
       const existingOrder = await Order.findOne({ orderId: order.id });
       if (existingOrder) {
@@ -50,7 +52,7 @@ const fetchTrendyolOrders = async (req, res) => {
       } else {
         const newOrder = new Order({
           orderId: order.id,
-          customerName: order.customer.fullName,
+          customerName: order.customer ? order.customer.fullName : 'Unknown',
           totalPrice: order.totalPrice,
           status: order.status,
           // Diğer alanları ekleyin
