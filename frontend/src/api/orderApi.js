@@ -1,10 +1,8 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:5000/api/trendyol';
-
 export const fetchTrendyolOrders = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}/fetch-orders`);
+    const response = await axios.get('http://localhost:5000/api/trendyol/fetch-orders');
     return response.data.orders;
   } catch (error) {
     console.error('Error fetching Trendyol orders:', error);
@@ -12,9 +10,13 @@ export const fetchTrendyolOrders = async () => {
   }
 };
 
-export const saveIntegration = async (integrationData) => {
+export const saveIntegration = async (apiKey, apiSecret, sellerId) => {
   try {
-    const response = await axios.post(`${BASE_URL}/save-integration`, integrationData);
+    const response = await axios.post('http://localhost:5000/api/trendyol/save-integration', {
+      apiKey,
+      apiSecret,
+      sellerId,
+    });
     return response.data;
   } catch (error) {
     console.error('Error saving integration:', error);
@@ -24,7 +26,7 @@ export const saveIntegration = async (integrationData) => {
 
 export const getIntegrationStatus = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}/integration-status`);
+    const response = await axios.get('http://localhost:5000/api/trendyol/integration-status');
     return response.data;
   } catch (error) {
     console.error('Error fetching integration status:', error);

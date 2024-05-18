@@ -44,10 +44,16 @@ const fetchTrendyolOrders = async (req, res) => {
     }
 
     const { apiKey, apiSecret, sellerId } = integration;
-    
+
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - 7);
+
+    console.log('Fetching orders with parameters:', {
+      status: 'Created,Picking',
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString()
+    });
 
     const response = await axios.get(`https://api.trendyol.com/sapigw/suppliers/${sellerId}/orders`, {
       headers: {
@@ -60,6 +66,8 @@ const fetchTrendyolOrders = async (req, res) => {
         endDate: endDate.toISOString()
       },
     });
+
+    console.log('Response from Trendyol:', response.data);
 
     const orders = response.data.content;
     res.json({ status: 'Orders fetched successfully', orders });
