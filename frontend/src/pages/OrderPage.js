@@ -1,48 +1,42 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { fetchTrendyolOrders } from '../api/orderApi';
-import { Box, Text, Button } from '@chakra-ui/react';
+import { Button, Box, Text } from '@chakra-ui/react';
 
 const OrderPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
 
   const handleFetchTrendyolOrders = async () => {
     setLoading(true);
-    setError(null);
+    setError('');
     try {
       const response = await fetchTrendyolOrders();
-      setOrders(response.orders);
+      console.log('Fetched orders:', response.data.orders); // Add this log
+      setOrders(response.data.orders || []);
     } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
+      console.error('Error fetching Trendyol orders:', error);
+      setError('Error fetching Trendyol orders');
     }
+    setLoading(false);
   };
-
-  useEffect(() => {
-    handleFetchTrendyolOrders();
-  }, []);
 
   return (
     <Box>
       <Button onClick={handleFetchTrendyolOrders} isLoading={loading}>
         Fetch Orders from Trendyol
       </Button>
-      {error && <Text color="red.500">Error fetching Trendyol orders: {error}</Text>}
-      {orders && orders.length > 0 ? (
+      {error && <Text color="red.500">{error}</Text>}
+      {orders.length > 0 ? (
         orders.map((order) => (
-          <Box key={order.id} p={4} borderWidth="1px" borderRadius="lg">
+          <Box key={order.id}>
             <Text>Order ID: {order.id}</Text>
-            <Text>Order Number: {order.orderNumber}</Text>
-            <Text>Customer Name: {order.customerFirstName} {order.customerLastName}</Text>
-            <Text>Order Status: {order.status}</Text>
-            <Text>Total Price: {order.totalPrice}</Text>
-            <Text>Delivery Type: {order.deliveryType}</Text>
+            <Text>Customer: {order.customerFirstName} {order.customerLastName}</Text>
+            <Text>Total Amount: {order.totalPrice} {order.currencyCode}</Text>
           </Box>
         ))
       ) : (
-        <Text>No orders found</Text>
+        !loading && <Text>No orders found</Text>
       )}
     </Box>
   );

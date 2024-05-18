@@ -30,6 +30,8 @@ const fetchTrendyolOrders = async (req, res) => {
       },
     });
 
+    console.log('Trendyol API response:', response.data);
+
     const orders = response.data.content;
     res.status(200).json({ orders });
   } catch (error) {
