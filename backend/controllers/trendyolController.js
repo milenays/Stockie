@@ -45,7 +45,6 @@ const fetchTrendyolOrders = async (req, res) => {
 
     const { apiKey, apiSecret, sellerId } = integration;
     
-    // Tarih filtresi için zaman damgaları oluştur
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - 7);
@@ -66,6 +65,11 @@ const fetchTrendyolOrders = async (req, res) => {
     res.json({ status: 'Orders fetched successfully', orders });
   } catch (error) {
     console.error('Error fetching orders:', error);
+    if (error.response) {
+      console.error('Response data:', error.response.data);
+      console.error('Response status:', error.response.status);
+      console.error('Response headers:', error.response.headers);
+    }
     res.status(500).json({ error: 'Failed to fetch orders' });
   }
 };

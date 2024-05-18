@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Input, Text } from '@chakra-ui/react';
 import { saveIntegration, getIntegrationStatus } from '../api/orderApi';
+import { Box, Button, Input, Text } from '@chakra-ui/react';
 
 const IntegrationsPage = () => {
   const [apiKey, setApiKey] = useState('');
@@ -9,7 +9,7 @@ const IntegrationsPage = () => {
   const [integrationStatus, setIntegrationStatus] = useState(null);
 
   useEffect(() => {
-    const fetchIntegrationStatus = async () => {
+    const fetchStatus = async () => {
       try {
         const status = await getIntegrationStatus();
         setIntegrationStatus(status);
@@ -18,12 +18,13 @@ const IntegrationsPage = () => {
       }
     };
 
-    fetchIntegrationStatus();
+    fetchStatus();
   }, []);
 
   const handleSaveIntegration = async () => {
     try {
-      const response = await saveIntegration({ apiKey, apiSecret, sellerId });
+      const integrationData = { apiKey, apiSecret, sellerId };
+      const response = await saveIntegration(integrationData);
       setIntegrationStatus(response);
     } catch (error) {
       console.error('Error saving integration:', error);
@@ -31,33 +32,41 @@ const IntegrationsPage = () => {
   };
 
   return (
-    <Box>
-      <Text fontSize="2xl" mb={4}>Trendyol Integration</Text>
-      <Input
-        placeholder="API Key"
-        value={apiKey}
-        onChange={(e) => setApiKey(e.target.value)}
-        mb={4}
-      />
-      <Input
-        placeholder="API Secret"
-        value={apiSecret}
-        onChange={(e) => setApiSecret(e.target.value)}
-        mb={4}
-      />
-      <Input
-        placeholder="Seller ID"
-        value={sellerId}
-        onChange={(e) => setSellerId(e.target.value)}
-        mb={4}
-      />
-      <Button onClick={handleSaveIntegration} colorScheme="blue">Save Integration</Button>
+    <Box p={5}>
+      <Box mb={3}>
+        <Text fontSize="xl">Trendyol Integration</Text>
+        <Input
+          placeholder="API Key"
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          mb={3}
+        />
+        <Input
+          placeholder="API Secret"
+          value={apiSecret}
+          onChange={(e) => setApiSecret(e.target.value)}
+          mb={3}
+        />
+        <Input
+          placeholder="Seller ID"
+          value={sellerId}
+          onChange={(e) => setSellerId(e.target.value)}
+          mb={3}
+        />
+        <Button onClick={handleSaveIntegration} colorScheme="blue">
+          Save Integration
+        </Button>
+      </Box>
       {integrationStatus && (
-        <Box mt={4}>
+        <Box mt={5}>
           <Text>Integration Status: {integrationStatus.status}</Text>
-          <Text>API Key: {integrationStatus.integration.apiKey}</Text>
-          <Text>API Secret: {integrationStatus.integration.apiSecret}</Text>
-          <Text>Seller ID: {integrationStatus.integration.sellerId}</Text>
+          {integrationStatus.integration && (
+            <Box>
+              <Text>API Key: {integrationStatus.integration.apiKey}</Text>
+              <Text>API Secret: {integrationStatus.integration.apiSecret}</Text>
+              <Text>Seller ID: {integrationStatus.integration.sellerId}</Text>
+            </Box>
+          )}
         </Box>
       )}
     </Box>
