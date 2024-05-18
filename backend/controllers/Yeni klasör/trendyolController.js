@@ -30,10 +30,7 @@ const fetchTrendyolOrders = async (req, res) => {
       },
     });
 
-    const orders = response.data.content.filter(order => 
-      order.status === 'Created' || order.status === 'Picking'
-    );
-    
+    const orders = response.data.content;
     res.status(200).json({ orders });
   } catch (error) {
     console.error('Error fetching Trendyol orders:', error.message);

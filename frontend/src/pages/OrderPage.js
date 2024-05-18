@@ -1,62 +1,45 @@
-import React, { useState } from 'react';
-import { Button, Table, Thead, Tbody, Tr, Th, Td, Box, useToast } from '@chakra-ui/react';
+import React, { useState, useEffect } from 'react';
+import { Box, Text, Button, Flex } from '@chakra-ui/react';
 import { fetchTrendyolOrders } from '../api/orderApi';
 
 const OrderPage = () => {
   const [orders, setOrders] = useState([]);
-  const toast = useToast();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleFetchTrendyolOrders = async () => {
+    setLoading(true);
+    setError('');
     try {
-      const fetchedOrders = await fetchTrendyolOrders();
-      setOrders(fetchedOrders);
-      toast({
-        title: "Orders fetched.",
-        description: "Orders fetched from Trendyol successfully.",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
+      const response = await fetchTrendyolOrders();
+      setOrders(response.orders);
     } catch (error) {
-      toast({
-        title: "Error fetching orders.",
-        description: error.message,
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
+      setError('Error fetching Trendyol orders: ' + error.message);
     }
+    setLoading(false);
   };
 
   return (
-    <Box p={5}>
-      <Button colorScheme="teal" onClick={handleFetchTrendyolOrders}>Fetch Orders from Trendyol</Button>
-      {orders.length > 0 ? (
-        <Table variant="simple" mt={5}>
-          <Thead>
-            <Tr>
-              <Th>Order ID</Th>
-              <Th>Customer</Th>
-              <Th>Total Price</Th>
-              <Th>Status</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {orders.map((order) => (
-              <Tr key={order.orderNumber}>
-                <Td>{order.orderNumber}</Td>
-                <Td>{order.customerFirstName} {order.customerLastName}</Td>
-                <Td>{order.totalPrice}</Td>
-                <Td>{order.status}</Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      ) : (
-        <Box mt={5}>
-          <Text>No orders found.</Text>
-        </Box>
-      )}
+    <Box p={4}>
+      <Button onClick={handleFetchTrendyolOrders} isLoading={loading} mb={4}>
+        Fetch Orders from Trendyol
+      </Button>
+      {error && <Text color="red.500">{error}</Text>}
+      <Flex direction="column">
+        {orders.length === 0 ? (
+          <Text>No orders found</Text>
+        ) : (
+          orders.map((order) => (
+            <Box key={order.orderNumber} p={4} shadow="md" borderWidth="1px">
+              <Text>Order Number: {order.orderNumber}</Text>
+              <Text>Customer Name: {order.customerFirstName} {order.customerLastName}</Text>
+              <Text>Address: {order.shipmentAddress.fullAddress}</Text>
+              <Text>Amount: {order.grossAmount}</Text>
+              <Text>Status: {order.status}</Text>
+            </Box>
+          ))
+        )}
+      </Flex>
     </Box>
   );
 };

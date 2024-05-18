@@ -1,73 +1,62 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Input, Box, Text, useToast } from '@chakra-ui/react';
-import { saveIntegration, getIntegrationStatus } from '../api/orderApi';
+import { Box, Button, Text, Input } from '@chakra-ui/react';
+import { getIntegrationStatus, saveIntegration } from '../api/orderApi';
 
-const IntegrationsPage = () => {
+const IntegrationPage = () => {
   const [apiKey, setApiKey] = useState('');
   const [apiSecret, setApiSecret] = useState('');
   const [sellerId, setSellerId] = useState('');
-  const toast = useToast();
+  const [status, setStatus] = useState('');
+
+  const fetchIntegrationStatus = async () => {
+    try {
+      const response = await getIntegrationStatus();
+      const { apiKey, apiSecret, sellerId } = response.integration;
+      setApiKey(apiKey);
+      setApiSecret(apiSecret);
+      setSellerId(sellerId);
+    } catch (error) {
+      console.error('Error fetching integration status:', error.message);
+    }
+  };
 
   useEffect(() => {
-    const fetchIntegrationStatus = async () => {
-      try {
-        const data = await getIntegrationStatus();
-        setApiKey(data.apiKey);
-        setApiSecret(data.apiSecret);
-        setSellerId(data.sellerId);
-      } catch (error) {
-        console.error('Error fetching integration status:', error);
-      }
-    };
-
     fetchIntegrationStatus();
   }, []);
 
   const handleSaveIntegration = async () => {
     try {
       await saveIntegration({ apiKey, apiSecret, sellerId });
-      toast({
-        title: "Integration saved.",
-        description: "Your integration settings have been saved successfully.",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
+      setStatus('Integration saved successfully');
     } catch (error) {
-      toast({
-        title: "Error saving integration.",
-        description: error.message,
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
+      setStatus('Error saving integration: ' + error.message);
     }
   };
 
   return (
-    <Box p={5}>
-      <Text fontSize="2xl" mb={5}>Trendyol Integration</Text>
+    <Box p={4}>
       <Input
         placeholder="API Key"
         value={apiKey}
         onChange={(e) => setApiKey(e.target.value)}
-        mb={3}
+        mb={2}
       />
       <Input
         placeholder="API Secret"
         value={apiSecret}
         onChange={(e) => setApiSecret(e.target.value)}
-        mb={3}
+        mb={2}
       />
       <Input
         placeholder="Seller ID"
         value={sellerId}
         onChange={(e) => setSellerId(e.target.value)}
-        mb={3}
+        mb={2}
       />
-      <Button colorScheme="teal" onClick={handleSaveIntegration}>Save Integration</Button>
+      <Button onClick={handleSaveIntegration}>Save Integration</Button>
+      {status && <Text mt={4}>{status}</Text>}
     </Box>
   );
 };
 
-export default IntegrationsPage;
+export default IntegrationPage;
