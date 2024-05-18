@@ -10,4 +10,24 @@ const fetchTrendyolOrders = async () => {
     }
 };
 
-export { fetchTrendyolOrders };
+const getIntegrationStatus = async () => {
+    try {
+        const response = await axios.get('http://localhost:5000/api/trendyol/integration-status');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching integration status:', error);
+        throw error;
+    }
+};
+
+const saveIntegration = async (integrationData) => {
+    try {
+        const response = await axios.post('http://localhost:5000/api/trendyol/save-integration', integrationData);
+        return response.data;
+    } catch (error) {
+        console.error('Error saving integration:', error);
+        throw error;
+    }
+};
+
+export { fetchTrendyolOrders, getIntegrationStatus, saveIntegration };

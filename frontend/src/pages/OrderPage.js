@@ -9,7 +9,7 @@ const OrderPage = () => {
     const handleFetchTrendyolOrders = async () => {
         try {
             const data = await fetchTrendyolOrders();
-            setOrders(data.orders);
+            setOrders(data.orders.filter(order => ['Created', 'Picking'].includes(order.status)));
             setError(null);
         } catch (error) {
             setError('Error fetching Trendyol orders');
