@@ -7,24 +7,8 @@ const orderSchema = new mongoose.Schema({
   totalPrice: Number,
   currencyCode: String,
   status: String,
-  shipmentAddress: {
-    fullName: String,
-    address1: String,
-    address2: String,
-    city: String,
-    district: String,
-    postalCode: String,
-    countryCode: String,
-    phone: String,
-  },
-  lines: [
-    {
-      productName: String,
-      quantity: Number,
-      price: Number,
-      productCode: String,
-    },
-  ],
+  shipmentAddress: Object,
+  lines: Array,
   orderDate: Date,
 });
 

@@ -1,5 +1,6 @@
 const axios = require('axios');
-const Order = require('../models/orderModel'); // Düzenlendi
+const Order = require('../models/orderModel');
+const Integration = require('../models/integrationModel');
 
 const fetchTrendyolOrders = async (req, res) => {
   try {
@@ -47,4 +48,36 @@ const fetchTrendyolOrders = async (req, res) => {
   }
 };
 
-module.exports = { fetchTrendyolOrders };
+const saveIntegration = async (req, res) => {
+  try {
+    const { apiKey, apiSecret, sellerId } = req.body;
+    let integration = await Integration.findOne({});
+    if (!integration) {
+      integration = new Integration({ apiKey, apiSecret, sellerId });
+    } else {
+      integration.apiKey = apiKey;
+      integration.apiSecret = apiSecret;
+      integration.sellerId = sellerId;
+    }
+    await integration.save();
+    res.json({ status: 'Integration saved successfully', integration });
+  } catch (error) {
+    console.error('Error saving integration:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getIntegrationStatus = async (req, res) => {
+  try {
+    const integration = await Integration.findOne({});
+    if (!integration) {
+      return res.status(404).json({ status: 'Integration not found' });
+    }
+    res.json({ status: 'Integration found', integration });
+  } catch (error) {
+    console.error('Error getting integration status:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { fetchTrendyolOrders, saveIntegration, getIntegrationStatus };
