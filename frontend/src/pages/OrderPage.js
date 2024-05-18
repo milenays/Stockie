@@ -1,47 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Text, Button, Flex } from '@chakra-ui/react';
 import { fetchTrendyolOrders } from '../api/orderApi';
+import { Button, Alert } from '@chakra-ui/react';
 
 const OrderPage = () => {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+    const [orders, setOrders] = useState([]);
+    const [error, setError] = useState(null);
 
-  const handleFetchTrendyolOrders = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await fetchTrendyolOrders();
-      setOrders(response.orders);
-    } catch (error) {
-      setError('Error fetching Trendyol orders: ' + error.message);
-    }
-    setLoading(false);
-  };
+    const handleFetchTrendyolOrders = async () => {
+        try {
+            const data = await fetchTrendyolOrders();
+            setOrders(data.orders);
+            setError(null);
+        } catch (error) {
+            setError('Error fetching Trendyol orders');
+        }
+    };
 
-  return (
-    <Box p={4}>
-      <Button onClick={handleFetchTrendyolOrders} isLoading={loading} mb={4}>
-        Fetch Orders from Trendyol
-      </Button>
-      {error && <Text color="red.500">{error}</Text>}
-      <Flex direction="column">
-        {orders.length === 0 ? (
-          <Text>No orders found</Text>
-        ) : (
-          orders.map((order) => (
-            <Box key={order.orderNumber} p={4} shadow="md" borderWidth="1px">
-              <Text>Order Number: {order.orderNumber}</Text>
-              <Text>Customer Name: {order.customerFirstName} {order.customerLastName}</Text>
-              <Text>Address: {order.shipmentAddress.fullAddress}</Text>
-              <Text>Amount: {order.grossAmount}</Text>
-              <Text>Status: {order.status}</Text>
-            </Box>
-          ))
-        )}
-      </Flex>
-    </Box>
-  );
+    useEffect(() => {
+        handleFetchTrendyolOrders();
+    }, []);
+
+    return (
+        <div>
+            <Button onClick={handleFetchTrendyolOrders}>Fetch Orders from Trendyol</Button>
+            {error && <Alert status="error">{error}</Alert>}
+            <div>
+                {orders.length > 0 ? (
+                    orders.map(order => (
+                        <div key={order.id}>
+                            <p>Order Number: {order.orderNumber}</p>
+                            <p>Status: {order.status}</p>
+                            <p>Total Price: {order.totalPrice}</p>
+                        </div>
+                    ))
+                ) : (
+                    <p>No orders found</p>
+                )}
+            </div>
+        </div>
+    );
 };
 
 export default OrderPage;
