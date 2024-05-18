@@ -13,8 +13,8 @@ const fetchTrendyolOrders = async (req, res) => {
     // Tarih aralığını hesapla (son 1 ay)
     const now = new Date();
     const oneMonthAgo = new Date(now.setMonth(now.getMonth() - 1));
-    const startDate = Math.floor(oneMonthAgo.getTime() / 1000); // Unix timestamp
-    const endDate = Math.floor(Date.now() / 1000); // Unix timestamp
+    const startDate = oneMonthAgo.toISOString().split('.')[0] + 'Z';
+    const endDate = new Date().toISOString().split('.')[0] + 'Z';
 
     // Trendyol API isteği
     const response = await axios.get(`https://api.trendyol.com/sapigw/suppliers/${sellerId}/orders`, {
@@ -30,7 +30,7 @@ const fetchTrendyolOrders = async (req, res) => {
       },
     });
 
-    const orders = response.data;
+    const orders = response.data.content;
     res.status(200).json({ orders });
   } catch (error) {
     console.error('Error fetching Trendyol orders:', error.response?.data || error.message);
