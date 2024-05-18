@@ -11,7 +11,11 @@ const IntegrationsPage = () => {
   useEffect(() => {
     const fetchStatus = async () => {
       const status = await getIntegrationStatus();
-      setIntegrationStatus(status);
+      if (typeof status === 'object') {
+        setIntegrationStatus(`Integration found: ${JSON.stringify(status)}`);
+      } else {
+        setIntegrationStatus(status);
+      }
     };
     fetchStatus();
   }, []);
