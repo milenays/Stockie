@@ -1,6 +1,7 @@
 const express = require('express');
-const router = express.Router();
 const { fetchTrendyolOrders, saveIntegration, getIntegrationStatus } = require('../controllers/trendyolController');
+
+const router = express.Router();
 
 router.get('/fetch-orders', fetchTrendyolOrders);
 router.post('/save-integration', saveIntegration);
