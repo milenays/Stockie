@@ -4,6 +4,6 @@ const { fetchTrendyolOrders, saveIntegration, getIntegrationStatus } = require('
 
 router.get('/fetch-orders', fetchTrendyolOrders);
 router.post('/save-integration', saveIntegration);
-router.get('/get-integration-status', getIntegrationStatus);
+router.get('/integration-status', getIntegrationStatus);
 
 module.exports = router;

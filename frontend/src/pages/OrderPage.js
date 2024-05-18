@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { fetchTrendyolOrders } from '../api/orderApi';
 import { Box, Text, Button, Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
 
@@ -19,10 +19,6 @@ const OrderPage = () => {
       console.error('Error fetching Trendyol orders:', error);
     }
   };
-
-  useEffect(() => {
-    handleFetchTrendyolOrders();
-  }, []);
 
   const indexOfLastOrder = currentPage * ordersPerPage;
   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
