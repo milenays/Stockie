@@ -44,20 +44,30 @@ const fetchTrendyolOrders = async (req, res) => {
     }
 
     const { apiKey, apiSecret, sellerId } = integration;
+    
+    // Tarih filtresi için zaman damgaları oluştur
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 7);
+
     const response = await axios.get(`https://api.trendyol.com/sapigw/suppliers/${sellerId}/orders`, {
       headers: {
         'Authorization': `Basic ${Buffer.from(`${apiKey}:${apiSecret}`).toString('base64')}`,
+        'Content-Type': 'application/json'
       },
       params: {
         status: 'Created,Picking',
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString()
       },
     });
 
-    res.json(response.data);
+    const orders = response.data.content;
+    res.json({ status: 'Orders fetched successfully', orders });
   } catch (error) {
-    console.error('Error fetching Trendyol orders:', error);
+    console.error('Error fetching orders:', error);
     res.status(500).json({ error: 'Failed to fetch orders' });
   }
 };
 
-module.exports = { saveIntegration, getIntegrationStatus, fetchTrendyolOrders };
+module.exports = { fetchTrendyolOrders, saveIntegration, getIntegrationStatus };
