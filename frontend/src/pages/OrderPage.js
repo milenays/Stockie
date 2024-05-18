@@ -1,43 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { fetchTrendyolOrders } from '../api/orderApi';
-import { Button, Box, Text } from '@chakra-ui/react';
+import { Box, Text, Button, Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
 
 const OrderPage = () => {
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [ordersPerPage] = useState(30);
 
   const handleFetchTrendyolOrders = async () => {
-    setLoading(true);
-    setError('');
     try {
       const response = await fetchTrendyolOrders();
-      console.log('Fetched orders:', response.data.orders); // Add this log
-      setOrders(response.data.orders || []);
+      if (Array.isArray(response.orders)) {
+        setOrders(response.orders);
+      } else {
+        console.error('Fetched orders is not an array', response.orders);
+      }
     } catch (error) {
       console.error('Error fetching Trendyol orders:', error);
-      setError('Error fetching Trendyol orders');
     }
-    setLoading(false);
   };
+
+  useEffect(() => {
+    handleFetchTrendyolOrders();
+  }, []);
+
+  const indexOfLastOrder = currentPage * ordersPerPage;
+  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+  const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <Box>
-      <Button onClick={handleFetchTrendyolOrders} isLoading={loading}>
-        Fetch Orders from Trendyol
-      </Button>
-      {error && <Text color="red.500">{error}</Text>}
-      {orders.length > 0 ? (
-        orders.map((order) => (
-          <Box key={order.id}>
-            <Text>Order ID: {order.id}</Text>
-            <Text>Customer: {order.customerFirstName} {order.customerLastName}</Text>
-            <Text>Total Amount: {order.totalPrice} {order.currencyCode}</Text>
-          </Box>
-        ))
-      ) : (
-        !loading && <Text>No orders found</Text>
-      )}
+      <Button onClick={handleFetchTrendyolOrders}>Fetch Orders from Trendyol</Button>
+      <Text>Order List</Text>
+      <Table>
+        <Thead>
+          <Tr>
+            <Th>Order Number</Th>
+            <Th>Customer Name</Th>
+            <Th>Total Price</Th>
+            <Th>Status</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {currentOrders.map(order => (
+            <Tr key={order.orderNumber}>
+              <Td>{order.orderNumber}</Td>
+              <Td>{`${order.customerFirstName} ${order.customerLastName}`}</Td>
+              <Td>{order.totalPrice}</Td>
+              <Td>{order.status}</Td>
+            </Tr>
+          ))}
+        </Tbody>
+      </Table>
+      <Box>
+        {Array.from({ length: Math.ceil(orders.length / ordersPerPage) }, (_, i) => (
+          <Button key={i} onClick={() => paginate(i + 1)}>
+            {i + 1}
+          </Button>
+        ))}
+      </Box>
     </Box>
   );
 };

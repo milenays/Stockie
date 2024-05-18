@@ -1,75 +1,50 @@
 const axios = require('axios');
-const Integration = require('../models/integrationModel');
+const Order = require('../models/orderModel'); // Düzenlendi
 
 const fetchTrendyolOrders = async (req, res) => {
   try {
-    const integration = await Integration.findOne();
+    const integration = await Integration.findOne({});
     if (!integration) {
-      return res.status(404).json({ message: 'Integration not found' });
+      return res.status(400).json({ error: 'Integration not found' });
     }
 
-    const { apiKey, apiSecret, sellerId } = integration;
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
-    // Tarih aralığını hesapla (son 1 ay)
-    const now = new Date();
-    const oneMonthAgo = new Date(now.setMonth(now.getMonth() - 1));
-    const startDate = Math.floor(oneMonthAgo.getTime());
-    const endDate = Math.floor(Date.now());
+    const params = {
+      status: 'Created,Picking,Shipped',
+      startDate: oneMonthAgo.toISOString(),
+      endDate: new Date().toISOString(),
+    };
 
-    // Trendyol API isteği
-    const response = await axios.get(`https://api.trendyol.com/sapigw/suppliers/${sellerId}/orders`, {
+    const response = await axios.get('https://api.trendyol.com/sapigw/suppliers/{supplierId}/orders', {
+      params,
       headers: {
-        'Authorization': `Basic ${Buffer.from(`${apiKey}:${apiSecret}`).toString('base64')}`,
-      },
-      params: {
-        'status': 'Created,Picking,Shipped',
-        'startDate': startDate,
-        'endDate': endDate,
-        'orderByField': 'CreatedDate',
-        'orderByDirection': 'DESC',
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${Buffer.from(`${integration.apiKey}:${integration.apiSecret}`).toString('base64')}`,
       },
     });
 
-    console.log('Trendyol API response:', response.data);
+    const { content } = response.data;
+    const orders = content.map(order => ({
+      orderNumber: order.orderNumber,
+      customerFirstName: order.customerFirstName,
+      customerLastName: order.customerLastName,
+      totalPrice: order.totalPrice,
+      currencyCode: order.currencyCode,
+      status: order.status,
+      shipmentAddress: order.shipmentAddress,
+      lines: order.lines,
+      orderDate: new Date(order.orderDate),
+    }));
 
-    const orders = response.data.content;
-    res.status(200).json({ orders });
+    await Order.insertMany(orders, { ordered: false, rawResult: true });
+
+    res.json({ orders });
   } catch (error) {
-    console.error('Error fetching Trendyol orders:', error.response?.data || error.message);
-    res.status(500).json({ message: 'Error fetching Trendyol orders', error: error.message });
+    console.error('Error fetching Trendyol orders:', error);
+    res.status(500).json({ error: error.message });
   }
 };
 
-const saveIntegration = async (req, res) => {
-  try {
-    const { apiKey, apiSecret, sellerId } = req.body;
-    let integration = await Integration.findOne();
-    if (integration) {
-      integration.apiKey = apiKey;
-      integration.apiSecret = apiSecret;
-      integration.sellerId = sellerId;
-    } else {
-      integration = new Integration({ apiKey, apiSecret, sellerId });
-    }
-    await integration.save();
-    res.status(200).json({ message: 'Integration saved successfully' });
-  } catch (error) {
-    console.error('Error saving integration:', error.message);
-    res.status(500).json({ message: 'Error saving integration', error: error.message });
-  }
-};
-
-const getIntegrationStatus = async (req, res) => {
-  try {
-    const integration = await Integration.findOne();
-    if (!integration) {
-      return res.status(404).json({ status: 'Integration not found' });
-    }
-    res.status(200).json({ status: 'Integration found', integration });
-  } catch (error) {
-    console.error('Error fetching integration status:', error.message);
-    res.status(500).json({ message: 'Error fetching integration status', error: error.message });
-  }
-};
-
-module.exports = { fetchTrendyolOrders, saveIntegration, getIntegrationStatus };
+module.exports = { fetchTrendyolOrders };
